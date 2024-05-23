@@ -1,0 +1,133 @@
+.booking-container {
+    display: flex;
+    justify-content: center;
+    .booking-wrapper {
+        width: 1300px;
+        max-width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        margin: 120px;
+        .content-left {
+            padding: 20px 8px;
+            background-color: var(--bg-grey-);
+            border-radius: 5px;
+
+            hr {
+                margin: 0;
+            }
+
+            .content-btn {
+                width: 100%;
+                justify-content: left;
+                &:hover {
+                    background-color: var(--grey-);
+                }
+            }
+        }
+
+        .content-right {
+            margin-left: 10px;
+            padding-left: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 20px;
+
+            input {
+                width: 100%;
+                padding: 6px 16px;
+                margin: auto 4px;
+                font-size: 1.6rem;
+                background-color: transparent;
+            }
+            select {
+                width: 100%;
+                padding: 6px 16px;
+                margin: auto 4px;
+                font-size: 1.6rem;
+                background-color: transparent;
+                border: none;
+                outline: none;
+            }
+
+            table,
+            tr,
+            th,
+            td {
+                border: 1px solid var(--border-color-);
+            }
+            thead {
+                background-color: var(--bg-grey-);
+            }
+            tr:nth-child(even) {
+                background-color: var(--bg-grey-);
+            }
+
+            th {
+                width: 120px;
+                text-align: center;
+                font-size: 1.6rem;
+                font-weight: 400;
+            }
+
+            td {
+                padding: 0 8px;
+                text-align: center;
+                font-size: 1.4rem;
+                font-weight: 400;
+            }
+
+            .edit-btn {
+                width: 100%;
+                background-color: var(--bg-grey-);
+                border-right: 1px solid var(--light-);
+                &:hover {
+                    background-color: var(--warning-);
+                    color: var(--white-);
+                }
+            }
+            .delete-btn {
+                width: 100%;
+                background-color: var(--bg-grey-);
+
+                &:hover {
+                    background-color: var(--danger-);
+                    color: var(--white-);
+                }
+            }
+
+            .input-group {
+                display: flex;
+                align-items: center;
+                background-color: var(--white-);
+                border: 1px solid var(--border-color-);
+                border-radius: 5px;
+            }
+
+            .first {
+                display: flex;
+                width: 100%;
+                gap: 15px;
+                .first-group {
+                    width: 100%;
+                }
+            }
+
+            .second {
+                display: flex;
+                width: 100%;
+                gap: 15px;
+                .second-group {
+                    width: 100%;
+                }
+            }
+
+            .booking-btn {
+                + .booking-btn {
+                    margin-left: 20px;
+                }
+            }
+        }
+    }
+}

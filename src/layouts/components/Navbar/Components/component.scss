@@ -1,0 +1,20 @@
+// Logo component
+.logo { 
+    object-fit: none;
+    padding: 0 20px;
+    display: flex;
+    
+}
+
+// Navbar Menu
+.nav-menu{
+    @media (max-width: 1524px) {
+        display: flex;
+        flex-direction: column;
+
+        .nav-item{
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+}

@@ -1,0 +1,56 @@
+.header {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 46px;
+    padding: 0;
+    background-color: var(--black-);
+    .container {
+        display: flex;
+        width: 1300px;
+        height: 100%;
+        justify-content: space-between;
+        align-items: center;
+        .left {
+            .home-btn {
+                padding: 15px 20px;
+                color: var(--text-color-);
+                &:hover {
+                    color: var(--white-);
+                    background-color: rgba(252, 252, 252, 0.3);
+                }
+            }
+        }
+
+        .right {
+            display: flex;
+            text-align: right;
+
+            .right-user {
+                display: flex;
+                .userinfor {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 1.4rem;
+                    color: var(--text-color-);
+                    p {
+                        text-align: center;
+                        margin: 0;
+                        padding: 0 4px;
+                    }
+
+                    .user-btn {
+                        padding: 11px 20px;
+                        color: var(--text-color-);
+
+                        &:hover {
+                            color: var(--white-);
+                            background-color: rgba(252, 252, 252, 0.3);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

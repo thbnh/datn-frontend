@@ -1,0 +1,250 @@
+.wrapper-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+
+    .content-admin {
+        padding: 60px 0;
+        margin: auto;
+        display: flex;
+        width: 1300px;
+        height: 100%;
+
+        .content-left {
+            padding: 20px 8px;
+            background-color: var(--bg-grey-);
+            border-radius: 5px;
+
+            hr {
+                margin: 0;
+            }
+
+            .content-btn {
+                width: 100%;
+                justify-content: left;
+                &:hover {
+                    background-color: var(--grey-);
+                }
+            }
+        }
+
+        .content-right {
+            margin-left: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+
+            table,
+            tr,
+            th,
+            td {
+                border: 1px solid var(--border-color-);
+            }
+            thead {
+                background-color: var(--bg-grey-);
+            }
+            tr:nth-child(even) {
+                background-color: var(--bg-grey-);
+            }
+
+            th {
+                width: 120px;
+                text-align: center;
+                font-size: 1.6rem;
+                font-weight: 400;
+            }
+
+            td {
+                padding: 0 8px;
+                text-align: center;
+                font-size: 1.4rem;
+                font-weight: 400;
+            }
+
+            .edit-btn {
+                background-color: var(--bg-grey-);
+                border-right: 1px solid var(--light-);
+                &:hover {
+                    background-color: var(--warning-);
+                    color: var(--white-);
+                }
+            }
+            .delete-btn {
+                background-color: var(--bg-grey-);
+
+                &:hover {
+                    background-color: var(--danger-);
+                    color: var(--white-);
+                }
+            }
+
+            .create-service {
+                margin-top: 30px;
+                border-radius: 10px;
+                background-color: var(--bg-grey-);
+
+                &:hover {
+                    background-color: var(--main-color-);
+                    color: var(--white-);
+                }
+            }
+        }
+    }
+
+    .background {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 60px 0;
+        background-color: rgba(0, 0, 0, 0.5);
+
+        .service-container {
+            width: 420px;
+            display: flex;
+            flex-direction: column;
+            padding: 48px 16px;
+            gap: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color-);
+            background-color: var(--bg-grey-);
+
+            .service-form {
+                input {
+                    width: 100%;
+                    padding: 10px 16px;
+                    margin: auto 4px;
+                    font-size: 1.6rem;
+                    background-color: transparent;
+                }
+
+                textarea {
+                    width: 100%;
+                    padding: 10px 12px;
+                    margin: auto 4px;
+                    font-size: 1.6rem;
+                    color: var(--str-grey-);
+                    background-color: transparent;
+                    border: none;
+                    outline: none;
+                }
+
+                button {
+                    padding: 10px 16px;
+                    margin: auto 4px;
+                    font-size: 1.6rem;
+                    color: var(--white-);
+                    background-color: var(--primary-);
+                    border-radius: 10px;
+                }
+
+                label {
+                    font-size: 1.6rem;
+                    margin: 8px 4px;
+                }
+                .input-group {
+                    display: flex;
+                    align-items: center;
+                    height: 100%;
+                    margin-bottom: 10px;
+                    background-color: var(--white-);
+                    border: 1px solid var(--border-color-);
+                    border-radius: 10px;
+                }
+                .form-actions {
+                    .exit-btn {
+                        background-color: var(--danger-);
+                    }
+                }
+            }
+        }
+    }
+
+    .edit-background {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 60px 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        .edit-container {
+            width: 600px;
+            display: flex;
+            flex-direction: column;
+            padding: 48px 16px;
+            gap: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color-);
+            background-color: var(--bg-grey-);
+
+            .edit-form {
+                input {
+                    width: 100%;
+                    padding: 10px 16px;
+                    margin: auto 4px;
+                    font-size: 1.6rem;
+                    background-color: transparent;
+                }
+
+                select {
+                    width: 100%;
+                    padding: 10px 12px;
+                    margin: auto 4px;
+                    font-size: 1.6rem;
+                    color: var(--str-grey-);
+                    background-color: transparent;
+                    border: none;
+                    outline: none;
+                }
+
+                button {
+                    padding: 10px 16px;
+                    margin: auto 4px;
+                    font-size: 1.6rem;
+                    color: var(--white-);
+                    background-color: var(--primary-);
+                    border-radius: 10px;
+                }
+
+                label {
+                    font-size: 1.6rem;
+                    margin: 8px 4px;
+                }
+                .first {
+                    display: flex;
+                    width: 100%;
+                    gap: 15px;
+                    .first-group {
+                        width: 100%;
+                    }
+                }
+                .second {
+                    display: flex;
+                    width: 100%;
+                    gap: 15px;
+                    .second-group {
+                        width: 100%;
+                    }
+                }
+                .input-group {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 10px;
+                    background-color: var(--white-);
+                    border: 1px solid var(--border-color-);
+                    border-radius: 10px;
+                }
+                .form-actions {
+                    .exit-btn {
+                        background-color: var(--danger-);
+                    }
+                }
+            }
+        }
+    }
+}

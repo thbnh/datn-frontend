@@ -1,0 +1,66 @@
+.btn-comp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    padding: 9px 16px;
+    font-size: 1.6rem;
+    font-weight: 500;
+    cursor: pointer;
+    background-color: transparent;
+    border: 1px solid transparent;
+    user-select: none;
+    font-family: 'Montserrat', sans-serif;
+    border: none;
+    &.disabled {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+}
+
+.left-icon + .title,
+.title + .right-icon {
+    margin-left: 8px;
+}
+.right-icon {
+    display: inline-flex;
+    width: 24px;
+    align-items: center;
+}
+
+// Các kiêu Button
+.headerbtn {
+    padding: 11px 20px;
+    color: var(--text-color-);
+    background-color: transparent;
+    text-decoration: none;
+    &:hover {
+        color: var(--white-);
+        background-color: rgba(252, 252, 252, 0.3);
+    }
+    
+}
+
+.navbtn {
+    min-width: 180px;
+    color: var(--black-);
+    &:hover {
+        color: var(--main-color-);
+    }
+}
+
+.mainbtn {
+    color: var(--str-grey-);
+    letter-spacing: 2px;
+    border: 1px solid var(--str-grey-);
+    &:hover {
+        border: 1px solid transparent;
+        color: var(--white-);
+        background-color: var(--main-color-);
+        transition: background-color 0.3s ease;
+    }
+    &:active {
+        background-color: rgba(0, 200, 200, 0.7);
+        transition: background-color 0.1s ease;
+    }
+}
