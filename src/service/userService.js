@@ -14,6 +14,7 @@ const handleSignupApi = (
     userAddress,
     userGender,
     userPhoneNumber,
+    userRoleId,
 ) => {
     return axios.post('/api/signup', {
         email: userEmail,
@@ -22,6 +23,7 @@ const handleSignupApi = (
         address: userAddress,
         gender: userGender,
         phoneNumber: userPhoneNumber,
+        roleId: userRoleId
     });
 };
 

@@ -78,6 +78,13 @@
                 font-weight: 400;
             }
 
+            .block {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                gap: 20px;
+            }
+
             .edit-btn {
                 width: 100%;
                 background-color: var(--bg-grey-);

@@ -60,15 +60,15 @@ function Login({ onSuccess }) {
                 setErrMessage(data.message);
             }
             if (data && data.errCode === 0) {
-                console.log(data)
+                console.log(data);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 localStorage.setItem('token', data.token);
 
                 const userRole = data.user.roleId;
                 if (userRole === '0') {
-                    navigate('/admin'); 
+                    navigate('/admin');
                 } else {
-                    navigate('/'); 
+                    navigate('/');
                 }
             }
         } catch (error) {
@@ -80,7 +80,11 @@ function Login({ onSuccess }) {
             toast.error('Đăng nhập thất bại. Vui lòng thử lại.');
         }
     };
-
+    const handleKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            handleLogin();
+        }
+    };
     // Xử lý đăng ký với Api
     const handleSignup = async () => {
         try {
@@ -113,8 +117,6 @@ function Login({ onSuccess }) {
         }
     };
 
-    
-
     const handleHideShowPassword = () => {
         setShowPassword(!showPassword);
     };
@@ -131,7 +133,6 @@ function Login({ onSuccess }) {
 
     return (
         <div className="login" onClick={handleOutsideClick}>
-            
             <div
                 className="login-container"
                 style={{ display: showSignupContainer ? 'none' : 'flex' }}
@@ -162,6 +163,7 @@ function Login({ onSuccess }) {
                             name="password"
                             value={user.password}
                             onChange={handleOnChangeInput}
+                            onKeyPress={handleKeyPress}
                             autoComplete="current-password"
                         />
                         <button
@@ -255,6 +257,7 @@ function Login({ onSuccess }) {
                                     value={user.gender}
                                     onChange={handleOnChangeInput}
                                 >
+                                    <option value="">--Chọn giới tính--</option>
                                     <option value="0">Nam</option>
                                     <option value="1">Nữ</option>
                                 </select>

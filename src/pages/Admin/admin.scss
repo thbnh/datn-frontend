@@ -80,6 +80,14 @@
                     color: var(--white-);
                 }
             }
+            .add-btn {
+                background-color: var(--bg-grey-);
+
+                &:hover {
+                    background-color: var(--success-);
+                    color: var(--white-);
+                }
+            }
 
             .create-service {
                 margin-top: 30px;
@@ -196,7 +204,6 @@
                     padding: 10px 12px;
                     margin: auto 4px;
                     font-size: 1.6rem;
-                    color: var(--str-grey-);
                     background-color: transparent;
                     border: none;
                     outline: none;

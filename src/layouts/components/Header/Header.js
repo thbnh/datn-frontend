@@ -6,9 +6,13 @@ import {
     faSignIn,
     faSignOut,
     faHome,
+    faUser,
+    faUserTie,
+    faBell,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import Notice from '../../../Components/Notice/notice';
 
 function Header() {
     const navigate = useNavigate();
@@ -38,7 +42,7 @@ function Header() {
             <div className="container">
                 <div className="left">
                     <Buttons
-                    to={'/'}
+                        to={'/'}
                         headerbtn
                         className="home-btn"
                         rightIcon={<FontAwesomeIcon icon={faHome} />}
@@ -78,10 +82,48 @@ function Header() {
                                             to={'/user-information'}
                                             className="user-btn"
                                         >
-                                            {JSON.parse(inforUser).fullName}
+                                            <FontAwesomeIcon icon={faUser} />
                                         </Buttons>
-                                        {renderRole(JSON.parse(inforUser).roleId) && (
-                                            <p>{renderRole(JSON.parse(inforUser).roleId)}</p>
+                                        {renderRole(
+                                            JSON.parse(inforUser).roleId,
+                                        ) === 'Admin' ? (
+                                            <Buttons
+                                            to={'/admin'}
+                                                className="role-btn"
+                                                leftIcon={
+                                                    <FontAwesomeIcon
+                                                        icon={faUserTie}
+                                                    />
+                                                }
+                                            >
+                                                Admin
+                                            </Buttons>
+                                        ) : renderRole(
+                                              JSON.parse(inforUser).roleId,
+                                          ) === 'Nhân viên' ? (
+                                            <Buttons
+                                                className="role-btn"
+                                                leftIcon={
+                                                    <FontAwesomeIcon
+                                                        icon={faUserTie}
+                                                    />
+                                                }
+                                            >
+                                                Nhân viên
+                                            </Buttons>
+                                        ) : (
+                                            <Notice>
+                                                <div>
+                                                    <Buttons
+                                                        className="bell-btn"
+                                                        
+                                                    >
+                                                        <FontAwesomeIcon
+                                                                icon={faBell}
+                                                            />
+                                                    </Buttons>
+                                                </div>
+                                            </Notice>
                                         )}
                                     </>
                                 )}

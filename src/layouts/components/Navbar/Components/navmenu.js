@@ -1,4 +1,4 @@
-import { faHouse } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarDays, faHouse, faPaw } from '@fortawesome/free-solid-svg-icons';
 import Buttons from '../../../../Components/Button/button';
 import './component.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,16 +17,16 @@ function Navmenu() {
             </Buttons>
             <Dropdown>
                 <div>
-                    <Buttons to={'/service'} navbtn className="nav-item">
-                        Dịch vụ thú cưng
+                    <Buttons to={'/service'} navbtn className="nav-item" leftIcon={<FontAwesomeIcon icon={faPaw}/>}>
+                        Các dịch vụ
                     </Buttons>
                 </div>
             </Dropdown>
-            <Buttons to={'/booking'} navbtn className="nav-item">
+            <Buttons to={'/booking'} navbtn className="nav-item" leftIcon={<FontAwesomeIcon icon={faCalendarDays}/>}>
                 Đặt dịch vụ
             </Buttons>
             <Buttons to navbtn className="nav-item">
-                About us
+                Thông tin của cúng tôi
             </Buttons>
         </div>
     );

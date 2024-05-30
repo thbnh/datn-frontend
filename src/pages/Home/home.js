@@ -17,11 +17,11 @@ function Home() {
     const settings = {
         dots: true,
         infinite: true,
-        speed: 500,
+        speed: 3000,
         slidesToShow: 1,
         slidesToScroll: 1,
         autoplay: true,
-        autoplaySpeed: 3000,
+        autoplaySpeed: 2000,
         nextArrow: <NextArrow />,
         prevArrow: <PrevArrow />,
     };

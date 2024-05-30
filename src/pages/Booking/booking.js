@@ -10,7 +10,6 @@ import { handleAddBookingApi } from '../../service/booking';
 function Booking() {
     const [userId, setUserId] = useState('');
     const [services, setServices] = useState([]);
-    const [users, setUsers] = useState([]);
     const [pets, setPets] = useState([]);
     const [booking, setBooking] = useState({
         serviceId: '',
@@ -29,38 +28,58 @@ function Booking() {
 
     const navigate = useNavigate();
 
-    const handleShowForm = (serviceId) => {
-        if (activeForm === serviceId) {
-            setActiveForm(null); // Đóng bảng nếu nhấn lại bảng hiện tại
-        } else {
-            setActiveForm(serviceId); // Mở bảng nếu nhấn vào bảng mới
-            setBooking((prevBooking) => ({
-                ...prevBooking,
-                serviceId,
-                userId,
-            }));
+    const handleShowForm = (serviceId, serviceName) => {
+        setActiveForm((prevForm) =>
+            prevForm === serviceId ? null : serviceId,
+        );
+        setBooking((prevBooking) => ({
+            ...prevBooking,
+            serviceId,
+            serviceName,
+            userId,
+        }));
+    };
+    // Hàm để tạo các ngày trong tuần
+    const generateDateOptions = () => {
+        const today = new Date();
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(today);
+            day.setDate(today.getDate() + i);
+            days.push(day.toISOString().split('T')[0]); // Lấy định dạng yyyy-mm-dd
         }
+        return days.map((date) => (
+            <option key={date} value={date}>
+                {date}
+            </option>
+        ));
     };
-
-    // Function để tạo danh sách các ngày trong tuần
-    const generateDayOptions = () => {
-        const days = [
-            'Thứ hai',
-            'Thứ ba',
-            'Thú tư',
-            'Thứ năm',
-            'Thứ sáu',
-            'Thứ bảy',
-            'Chủ nhật',
-        ];
-        return days.map((day) => <option key={day}>{day}</option>);
+    // Hàm để tạo các giờ trong ngày
+    const generateTimeOptions = () => {
+        const times = [];
+        for (let hour = 8; hour < 22; hour++) {
+            for (let minute = 0; minute < 60; minute += 15) {
+                const time = `${String(hour).padStart(2, '0')}:${String(
+                    minute,
+                ).padStart(2, '0')}:00`;
+                times.push(time);
+            }
+        }
+        return times;
     };
-    // Function để tạo danh sách các giờ trong ngày
-    const generateHourOptions = () => {
-        const hours = Array.from({ length: 24 }, (_, i) => i);
-        return hours.map((hour) => <option key={hour}>{hour}</option>);
+    // Hàm để tạo giờ kết thúc với đk lớn hơn giờ bắt đầu
+    const generateEndTimeOptions = (startTime) => {
+        if (!startTime) return [];
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const times = generateTimeOptions();
+        return times.filter((time) => {
+            const [hour, minute] = time.split(':').map(Number);
+            return (
+                hour > startHour || (hour === startHour && minute > startMinute)
+            );
+        });
     };
-
+    // Lấy thông tin dịch vụ qua API
     useEffect(() => {
         const getServiceInfor = async () => {
             try {
@@ -72,14 +91,13 @@ function Booking() {
         };
         getServiceInfor();
     }, []);
-
+    // Lấy thông tin vật nuôi của người dùng qua API
     useEffect(() => {
         if (userId) {
             const getPetsByUserId = async () => {
                 try {
                     const data = await getPetsByUserIdApi(userId);
                     setPets(data);
-                    console.log(data);
                 } catch (error) {
                     console.error('Lỗi khi lấy danh sách thú nuôi:', error);
                 }
@@ -87,57 +105,29 @@ function Booking() {
             getPetsByUserId();
         }
     }, [userId]);
-
-    useEffect(() => {
-        // Kiểm tra xem người dùng đã đăng nhập hay chưa
-        const storedUser = localStorage.getItem('user');
-        setUsers(storedUser);
-        console.log(storedUser);
-        if (storedUser) {
-            setIsLoggedIn(true);
-        } else {
-            setIsLoggedIn(false);
-        }
-    }, []);
-
-    
-
+    // Lấy thông tin người dùng đã đăng nhập
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             const user = JSON.parse(storedUser);
             setUserId(user.id);
+            setBooking((prevBooking) => ({
+                ...prevBooking,
+                userName: user.name,
+                userId: user.id,
+            }));
+            setIsLoggedIn(true);
+        } else {
+            setIsLoggedIn(false);
         }
     }, []);
-
+    // Sự kiện nhân dữ liệu khi nhập Input
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setBooking((prevBooking) => ({
             ...prevBooking,
             [name]: value,
         }));
-
-        if (name === 'serviceName') {
-            const selectedService = services.find(
-                (service) => service.serviceName === value,
-            );
-            if (selectedService) {
-                setBooking((prevBooking) => ({
-                    ...prevBooking,
-                    serviceId: selectedService.id,
-                }));
-            }
-        }
-
-        if (name === 'fullName') {
-            const selectedUser = users.find((user) => user.fullName === value);
-            if (selectedUser) {
-                setBooking((prevBooking) => ({
-                    ...prevBooking,
-                    userId: selectedUser.id,
-                }));
-            }
-        }
     };
 
     const handleAddBooking = async () => {
@@ -181,7 +171,12 @@ function Booking() {
                             <div key={service.id}>
                                 <Buttons
                                     className="content-btn"
-                                    onClick={() => handleShowForm(service.id)}
+                                    onClick={() =>
+                                        handleShowForm(
+                                            service.id,
+                                            service.serviceName,
+                                        )
+                                    }
                                 >
                                     {service.serviceName}
                                 </Buttons>
@@ -191,188 +186,189 @@ function Booking() {
                     </div>
                     <ToastContainer />
                     <div className="content-right col-7">
-                        {activeForm && (
-                            <>
-                                {services.map((service) => (
-                                    <>
-                                        {activeForm === service.id && (
-                                            <>
-                                                <h1 key={service.id}>
-                                                    {service.serviceName}
-                                                </h1>
-                                                <div className="first">
-                                                    <div className="first-group">
-                                                        <label>
-                                                            Tên dịch vụ
-                                                        </label>
-                                                        <div className="input-group">
-                                                            <input
-                                                                type="text"
-                                                                name="serviceName"
-                                                                value={
-                                                                    booking.serviceName
-                                                                }
-                                                                onChange={
-                                                                    handleInputChange
-                                                                }
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="first-group">
-                                                        <label>
-                                                            Tên người dùng
-                                                        </label>
-                                                        <div className="input-group">
-                                                            <input
-                                                                type="text"
-                                                                name="userName"
-                                                                value={
-                                                                    booking.userName
-                                                                }
-                                                                onChange={
-                                                                    handleInputChange
-                                                                }
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="second">
-                                                    <div className="second-group">
-                                                        <label>
-                                                            Tên vật nuôi
-                                                        </label>
-                                                        <div className="input-group">
-                                                            <select
-                                                                name="petId"
-                                                                value={
-                                                                    booking.petId
-                                                                }
-                                                                onChange={
-                                                                    handleInputChange
-                                                                }
-                                                            >
-                                                                <option value="">
-                                                                    Chọn vật
-                                                                    nuôi
-                                                                </option>
-                                                                {pets.map(
-                                                                    (pet) => (
-                                                                        <option
-                                                                            key={
-                                                                                pet.id
-                                                                            }
-                                                                            value={
-                                                                                pet.id
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                pet.petName
-                                                                            }
-                                                                        </option>
-                                                                    ),
-                                                                )}
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div className="second-group">
-                                                        <label>Thời gian</label>
-                                                        <div className="input-group">
-                                                            <input
-                                                                type="text"
-                                                                name="time"
-                                                                value={
-                                                                    booking.time
-                                                                }
-                                                                onChange={
-                                                                    handleInputChange
-                                                                }
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="second">
-                                                    <div className="second-group">
-                                                        <label>
-                                                            Thời gian bắt đầu
-                                                        </label>
-                                                        <div className="input-group">
-                                                            <select
-                                                                name="startTime" // Đặt name là "startTime"
-                                                                value={
-                                                                    booking.startTime
-                                                                } // Giá trị được chọn sẽ được lưu trong trạng thái của component
-                                                                onChange={
-                                                                    handleInputChange
-                                                                } // Gọi handleInputChange khi thay đổi giá trị
-                                                            >
-                                                                <option value="">
-                                                                    Chọn giờ bắt
-                                                                    đầu
-                                                                </option>
-                                                                {generateHourOptions()}{' '}
-                                                                {/* Gọi hàm generateHourOptions để tạo danh sách các giờ */}
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div className="second-group">
-                                                        <label>
-                                                            Thời gian kết thúc
-                                                        </label>
-                                                        <div className="input-group">
-                                                            <select
-                                                                name="endTime" // Đặt name là "endTime"
-                                                                value={
-                                                                    booking.endTime
-                                                                } // Giá trị được chọn sẽ được lưu trong trạng thái của component
-                                                                onChange={
-                                                                    handleInputChange
-                                                                } // Gọi handleInputChange khi thay đổi giá trị
-                                                            >
-                                                                <option value="">
-                                                                    Chọn giờ kết
-                                                                    thúc
-                                                                </option>
-                                                                {generateHourOptions()}{' '}
-                                                                {/* Gọi hàm generateHourOptions để tạo danh sách các giờ */}
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="second-group">
-                                                    <label>Ngày</label>
+                        {activeForm &&
+                            services.map((service) => (
+                                <div key={service.id} className='block'>
+                                    {activeForm === service.id && (
+                                        <>
+                                            <h1>{service.serviceName}</h1>
+                                            <div className="first">
+                                                <div className="first-group">
+                                                    <label>Tên dịch vụ</label>
                                                     <div className="input-group">
-                                                        <select
-                                                            name="date" // Đặt name là "date"
-                                                            value={booking.date} // Giá trị được chọn sẽ được lưu trong trạng thái của component
+                                                        <input
+                                                            type="text"
+                                                            name="serviceName"
+                                                            value={
+                                                                booking.serviceName
+                                                            }
                                                             onChange={
                                                                 handleInputChange
-                                                            } // Gọi handleInputChange khi thay đổi giá trị
+                                                            }
+                                                            readOnly
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="first-group">
+                                                    <label>
+                                                        Tên người dùng
+                                                    </label>
+                                                    <div className="input-group">
+                                                        <input
+                                                            type="text"
+                                                            name="userName"
+                                                            value={
+                                                                booking.userName
+                                                            }
+                                                            onChange={
+                                                                handleInputChange
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="second">
+                                                <div className="second-group">
+                                                    <label>Tên vật nuôi</label>
+                                                    <div className="input-group">
+                                                        <select
+                                                            name="petId"
+                                                            value={
+                                                                booking.petId
+                                                            }
+                                                            onChange={
+                                                                handleInputChange
+                                                            }
                                                         >
                                                             <option value="">
-                                                                Chọn ngày
+                                                                Chọn vật nuôi
                                                             </option>
-                                                            {generateDayOptions()}{' '}
-                                                            {/* Gọi hàm generateDayOptions để tạo danh sách các ngày */}
+                                                            {pets.map((pet) => (
+                                                                <option
+                                                                    key={pet.id}
+                                                                    value={
+                                                                        pet.id
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        pet.petName
+                                                                    }
+                                                                </option>
+                                                            ))}
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div>
-                                                    <Buttons
-                                                        className="booking-btn"
-                                                        mainbtn
-                                                        onClick={
-                                                            handleAddBooking
+                                                <div className="second-group">
+                                                    <label>Thời gian</label>
+                                                    <div className="input-group">
+                                                        <input
+                                                            type="text"
+                                                            name="time"
+                                                            value={booking.time}
+                                                            onChange={
+                                                                handleInputChange
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="second">
+                                                <div className="second-group">
+                                                    <label>
+                                                        Thời gian bắt đầu
+                                                    </label>
+                                                    <div className="input-group">
+                                                        <select
+                                                            name="startTime"
+                                                            value={
+                                                                booking.startTime
+                                                            }
+                                                            onChange={
+                                                                handleInputChange
+                                                            }
+                                                        >
+                                                            <option value="">
+                                                                Chọn giờ bắt đầu
+                                                            </option>
+                                                            {generateTimeOptions().map(
+                                                                (time) => (
+                                                                    <option
+                                                                        key={
+                                                                            time
+                                                                        }
+                                                                        value={
+                                                                            time
+                                                                        }
+                                                                    >
+                                                                        {time}
+                                                                    </option>
+                                                                ),
+                                                            )}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div className="second-group">
+                                                    <label>
+                                                        Thời gian kết thúc
+                                                    </label>
+                                                    <div className="input-group">
+                                                        <select
+                                                            name="endTime"
+                                                            value={
+                                                                booking.endTime
+                                                            }
+                                                            onChange={
+                                                                handleInputChange
+                                                            }
+                                                        >
+                                                            <option value="">
+                                                                Chọn giờ kết
+                                                                thúc
+                                                            </option>
+                                                            {generateEndTimeOptions(
+                                                                booking.startTime,
+                                                            ).map((time) => (
+                                                                <option
+                                                                    key={time}
+                                                                    value={time}
+                                                                >
+                                                                    {time}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="second-group">
+                                                <label>Ngày</label>
+                                                <div className="input-group">
+                                                    <select
+                                                        name="date"
+                                                        value={booking.date}
+                                                        onChange={
+                                                            handleInputChange
                                                         }
                                                     >
-                                                        Đặt dịch vụ
-                                                    </Buttons>
+                                                        <option value="">
+                                                            Chọn ngày
+                                                        </option>
+                                                        {generateDateOptions()}
+                                                    </select>
                                                 </div>
-                                            </>
-                                        )}
-                                    </>
-                                ))}
-                            </>
-                        )}
+                                            </div>
+                                            <div>
+                                                <Buttons
+                                                    className="booking-btn"
+                                                    mainbtn
+                                                    onClick={handleAddBooking}
+                                                >
+                                                    Đặt dịch vụ
+                                                </Buttons>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
                     </div>
                 </div>
             )}

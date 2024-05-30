@@ -41,7 +41,27 @@
                     }
 
                     .user-btn {
+                        min-width: 40px;
+                        padding: 11px 15px;
+                        color: var(--text-color-);
+
+                        &:hover {
+                            color: var(--white-);
+                            background-color: rgba(252, 252, 252, 0.3);
+                        }
+                    }
+                    .role-btn {
                         padding: 11px 20px;
+                        color: var(--text-color-);
+
+                        &:hover {
+                            color: var(--white-);
+                            background-color: rgba(252, 252, 252, 0.3);
+                        }
+                    }
+                    .bell-btn {
+                        min-width: 40px;
+                        padding: 11px 15px;
                         color: var(--text-color-);
 
                         &:hover {
