@@ -107,7 +107,6 @@ function Users() {
                 try {
                     const data = await getPetsByUserIdApi(userId);
                     setPets(data);
-                    console.log(data);
                 } catch (error) {
                     console.error('Lỗi khi lấy danh sách thú nuôi:', error);
                 }

@@ -28,9 +28,13 @@ const handleAddBookingApi = (serviceId, userId, petId, time, date, startTime, en
 const handleUpdateBookingApi = (bookingtId, bookingData) => {
     return axios.put(`/api/update-booking/${bookingtId}`, bookingData);
 };
+const handleDeleteBookingApi = (bookingtId) => {
+    return axios.delete(`/api/delete-booking/${bookingtId}`)
+};
 
 export {
     getBookingInforApi,
     handleAddBookingApi,
-    handleUpdateBookingApi
+    handleUpdateBookingApi,
+    handleDeleteBookingApi,
 }

@@ -19,13 +19,24 @@ import {
 } from '../../service/petService';
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarDays, faCheck, faPaw, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import {
+    faCalendarDays,
+    faCheck,
+    faPaw,
+    faPen,
+    faTrashCan,
+} from '@fortawesome/free-solid-svg-icons';
 import { ToastContainer, toast } from 'react-toastify';
 import {
     getBookingInforApi,
+    handleDeleteBookingApi,
     handleUpdateBookingApi,
 } from '../../service/booking';
 import bcrypt from 'bcryptjs';
+import {
+    getDetailInforApi,
+    handleAddDetailApi,
+} from '../../service/detailService';
 
 const salt = bcrypt.genSaltSync(10);
 const hashPassword = (password) => {
@@ -44,6 +55,7 @@ function Admin() {
     const [pets, setPets] = useState([]);
     const [services, setServices] = useState([]);
     const [bookings, setBookings] = useState([]);
+    const [details, setDetails] = useState([]);
 
     const [valueUser, setValueUser] = useState(null);
     const [valuePet, setValuePet] = useState(null);
@@ -66,7 +78,17 @@ function Admin() {
         price: '',
         description: '',
     });
-
+    const [newDetail, setNewDetail] = useState({
+        serviceId: '',
+        petId: '',
+        userId: '',
+        price: '',
+        phoneNumber: '',
+        time: '',
+        date: '',
+        startTime: '',
+        endTime: '',
+    });
     // Trạng thái để hiển thị Edit form
     const [showEditUserForm, setShowEditUserForm] = useState(false);
     const [showEditPetForm, setShowEditPetForm] = useState(false);
@@ -75,6 +97,10 @@ function Admin() {
     // Trạng thái để hiển thị Create form
     const [showUserForm, setShowUserForm] = useState(false);
     const [showServiceForm, setShowServiceForm] = useState(false);
+    const [showDetailForm, setShowDetailForm] = useState(false);
+
+    const [servicePrice, setServicePrice] = useState('');
+    const [userPhone, setUserPhone] = useState('');
     // Sự kiện đóng mở bảng dữ liệu
     const handleShowTable = (table) => {
         setActiveTable(activeTable === table ? '' : table);
@@ -99,6 +125,9 @@ function Admin() {
     const handleShowServiceForm = () => {
         setShowServiceForm(!showServiceForm);
     };
+    const handleShowDetailForm = () => {
+        setShowDetailForm(!showDetailForm);
+    };
 
     const editUserFormRef = useRef(null);
     const editPetFormRef = useRef(null);
@@ -106,6 +135,7 @@ function Admin() {
     const editBookingFormRef = useRef(null);
     const userFormRef = useRef(null);
     const serviceFormRef = useRef(null);
+    const detailFormRef = useRef(null);
 
     // Sư kiện Click ra ngoài thoát overlay
     const handleOutClick = (event) => {
@@ -120,6 +150,12 @@ function Admin() {
             !userFormRef.current.contains(event.target)
         ) {
             setShowUserForm(false);
+        }
+        if (
+            detailFormRef.current &&
+            !detailFormRef.current.contains(event.target)
+        ) {
+            setShowDetailForm(false);
         }
         if (
             editUserFormRef.current &&
@@ -173,6 +209,10 @@ function Admin() {
             ...prevService,
             [name]: value,
         }));
+        setNewDetail((prevDetail) => ({
+            ...prevDetail,
+            [name]: value,
+        }));
     };
     // Sự kiện thêm dữ liệu vào from
     const handleValueUser = (user) => {
@@ -191,7 +231,35 @@ function Admin() {
         setValueBooking(booking);
         setShowEditBookingForm(true);
     };
-    // Lấy dữ liệu người dùng bằng API
+    const handleValueBookingFrom = (booking) => {
+        setValueBooking(booking);
+        const service = services.find(
+            (service) => service.id === booking.serviceId,
+        );
+        if (service) {
+            setServicePrice(service.price);
+        }
+        const user = users.find((user) => user.id === booking.userId);
+        if (user) {
+            setUserPhone(user.phoneNumber);
+        }
+        setShowDetailForm(true);
+    };
+    const getUserFullName = (userId) => {
+        const user = users.find((user) => user.id === userId);
+        return user ? user.fullName : 'N/A';
+    };
+    // Lấy tên vật nuôi từ id
+    const getPetName = (petId) => {
+        const pet = pets.find((pet) => pet.id === petId);
+        return pet ? pet.petName : 'N/A';
+    };
+    // Lấy tên dịch vụ từ id
+    const getServiceName = (serviceId) => {
+        const service = services.find((service) => service.id === serviceId);
+        return service ? service.serviceName : 'N/A';
+    };
+    // User
     useEffect(() => {
         const getUserInfor = async () => {
             try {
@@ -204,7 +272,7 @@ function Admin() {
 
         getUserInfor();
     }, []);
-    //
+
     const handleAddUser = async () => {
         try {
             const hashedPassword = await hashPassword(newUser.password);
@@ -229,7 +297,7 @@ function Admin() {
             toast.error('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
         }
     };
-    // Xóa người dùng với API
+
     const handleDeleteUser = async (userId) => {
         try {
             const data = await handleDeleteUserApi(userId);
@@ -244,7 +312,7 @@ function Admin() {
             toast.error('Đã xảy ra lỗi khi xóa người dùng');
         }
     };
-    // Sửa thông tin người dùng với API
+
     const handleUpdateUser = async () => {
         try {
             const data = await handleUpdateUserApi(valueUser.id, valueUser);
@@ -264,7 +332,7 @@ function Admin() {
             toast.error('Đã xảy ra lỗi khi cập nhật người dùng');
         }
     };
-    // Lấy dữ liệu dịch vụ bằng API
+    // Service
     useEffect(() => {
         const getServiceInfor = async () => {
             try {
@@ -276,7 +344,7 @@ function Admin() {
         };
         getServiceInfor();
     }, []);
-    // Thêm thông tin dịch vụ bằng API
+
     const handleAddService = async () => {
         try {
             const data = await handleAddServiceApi(
@@ -297,7 +365,7 @@ function Admin() {
             toast.error('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
         }
     };
-    // Sửa thông tin dịch với API
+
     const handleUpdateService = async () => {
         try {
             const data = await handleUpdateServiceApi(
@@ -320,7 +388,7 @@ function Admin() {
             toast.error('Đã xảy ra lỗi khi cập nhật dịch vụ');
         }
     };
-    // Xóa thông tin dịch vụ
+
     const handleDeleteService = async (serviceId) => {
         try {
             const data = await handleDeleteServiceApi(serviceId);
@@ -337,7 +405,7 @@ function Admin() {
             toast.error('Đã xảy ra lỗi khi xóa dịch vụ');
         }
     };
-    // Lấy dữ liệu vật nuôi bằng API
+    // Pet
     useEffect(() => {
         const getPetInfor = async () => {
             try {
@@ -349,7 +417,7 @@ function Admin() {
         };
         getPetInfor();
     }, []);
-    // Sửa thông tin vật nuôi với API
+
     const handleUpdatePet = async () => {
         try {
             const data = await handleUpdatePetApi(valuePet.id, valuePet);
@@ -370,7 +438,7 @@ function Admin() {
             toast.error('Đã xảy ra lỗi khi cập nhật vật nuôi');
         }
     };
-    // Xóa thông tin vât nuôi
+
     const handleDeletePet = async (petId) => {
         try {
             const data = await handleDeletePetApi(petId);
@@ -385,7 +453,7 @@ function Admin() {
             toast.error('Đã xảy ra lỗi khi xóa Vật nuôi');
         }
     };
-    // Lấy thông tin các dịch vụ được đặt
+    // Booking
     useEffect(() => {
         const getBookingInfor = async () => {
             try {
@@ -397,7 +465,7 @@ function Admin() {
         };
         getBookingInfor();
     }, []);
-    // Sửa thông tin lịch hẹn
+
     const handleUpdateBooking = async () => {
         try {
             const data = await handleUpdateBookingApi(
@@ -416,6 +484,61 @@ function Admin() {
                 toast.error(`Cập nhật không thành công: ${data.errMessage}`);
             }
         } catch (error) {}
+    };
+
+    const handleDeleteBooking = async (bookingId) => {
+        try {
+            const data = await handleDeleteBookingApi(bookingId);
+            if (data.status === '200') {
+                setBookings(
+                    bookings.filter((booking) => booking.id !== bookingId),
+                );
+                toast.success(`${data.errMessage}`);
+            } else {
+                toast.error(`Xóa không thành công: ${data.errMessage}`);
+            }
+        } catch (error) {
+            console.error('Lỗi khi xóa lịch hẹn:', error);
+            toast.error('Đã xảy ra lỗi khi xóa lịch hẹn');
+        }
+    };
+    // Detail
+    useEffect(() => {
+        const getDetailInfor = async () => {
+            try {
+                const detailData = await getDetailInforApi();
+                setDetails(detailData);
+            } catch (error) {
+                console.error('Lỗi khi lấy dữ liệu chi tiết dịch vụ:', error);
+            }
+        };
+        getDetailInfor();
+    }, []);
+    const handleAddDetail = async () => {
+        try {
+            const data = await handleAddDetailApi(
+                (newDetail.serviceId = valueBooking.serviceId),
+                (newDetail.petId = valueBooking.petId),
+                (newDetail.userId = valueBooking.userId),
+                (newDetail.price = servicePrice),
+                (newDetail.phoneNumber = userPhone),
+                (newDetail.time = valueBooking.time),
+                (newDetail.date = valueBooking.date),
+                (newDetail.startTime = valueBooking.startTime),
+                (newDetail.endTime = valueBooking.endTime),
+            );
+            if (data && data.status === '200') {
+                console.log('Đặt thành công');
+                toast.success('Đặt thành công!');
+                handleShowDetailForm();
+            } else {
+                console.error('Đặt thất bại:', data?.data?.errMessage);
+                toast.error('Đặt thất bại. Vui lòng thử lại.');
+            }
+        } catch (error) {
+            console.error('Lỗi khi đặt dịch vụ:', error);
+            toast.error('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+        }
     };
     // Hàm để tạo các ngày trong tuần
     const generateDateOptions = () => {
@@ -469,7 +592,8 @@ function Admin() {
                         showEditServiceForm ||
                         showEditBookingForm ||
                         showUserForm ||
-                        showServiceForm
+                        showServiceForm ||
+                        showDetailForm
                             ? 'none'
                             : 'flex',
                 }}
@@ -519,7 +643,6 @@ function Admin() {
                 </div>
                 <ToastContainer />
                 <div className="content-right col-9">
-                    {/* Bảng người dùng */}
                     {activeTable === 'user' && (
                         <>
                             <table className="user-table">
@@ -592,7 +715,14 @@ function Admin() {
                                                 >
                                                     Xóa
                                                 </Buttons>
-                                                <Buttons className='add-btn' rightIcon={<FontAwesomeIcon icon={faPaw}/>}>
+                                                <Buttons
+                                                    className="add-btn"
+                                                    rightIcon={
+                                                        <FontAwesomeIcon
+                                                            icon={faPaw}
+                                                        />
+                                                    }
+                                                >
                                                     Thêm
                                                 </Buttons>
                                             </td>
@@ -610,7 +740,6 @@ function Admin() {
                             </>
                         </>
                     )}
-                    {/* Bảng thú nuôi */}
                     {activeTable === 'pet' && (
                         <>
                             <table className="user-table">
@@ -621,7 +750,7 @@ function Admin() {
                                         <th>Loài</th>
                                         <th>Cân nặng (kg)</th>
                                         <th>Mã người dùng</th>
-                                        <th></th>
+                                        <th>Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -673,7 +802,6 @@ function Admin() {
                             </table>
                         </>
                     )}
-                    {/* Bảng dịch vụ */}
                     {activeTable === 'service' && (
                         <>
                             <table className="user-table">
@@ -752,7 +880,6 @@ function Admin() {
                             </>
                         </>
                     )}
-                    {/* Bảng lịch các dịch vụ được đặt */}
                     {activeTable === 'booking' && (
                         <>
                             <table className="user-table">
@@ -805,6 +932,11 @@ function Admin() {
                                                 </Buttons>
                                                 <Buttons
                                                     className="delete-btn"
+                                                    onClick={() =>
+                                                        handleDeleteBooking(
+                                                            booking.id,
+                                                        )
+                                                    }
                                                     rightIcon={
                                                         <FontAwesomeIcon
                                                             icon={faTrashCan}
@@ -813,7 +945,21 @@ function Admin() {
                                                 >
                                                     Xóa
                                                 </Buttons>
-                                                <Buttons className='add-btn' rightIcon={<FontAwesomeIcon icon={faCalendarDays}/>}>
+                                                <Buttons
+                                                    className="add-btn"
+                                                    onClick={() =>
+                                                        handleValueBookingFrom(
+                                                            booking,
+                                                        )
+                                                    }
+                                                    rightIcon={
+                                                        <FontAwesomeIcon
+                                                            icon={
+                                                                faCalendarDays
+                                                            }
+                                                        />
+                                                    }
+                                                >
                                                     Đặt
                                                 </Buttons>
                                             </td>
@@ -830,26 +976,29 @@ function Admin() {
                                 <thead>
                                     <tr>
                                         <th>Tên dịch vụ</th>
+                                        <th>Tên vật nuôi</th>
                                         <th>Tên người dùng</th>
-                                        <th>Tên thú nuôi</th>
                                         <th>Giá</th>
+                                        <th>Số điện thoại</th>
                                         <th>Thời gian</th>
                                         <th>Ngày</th>
                                         <th>Thời gian bắt đầu</th>
                                         <th>Thời gian kết thúc</th>
-                                        <th></th>
+                                        <th>Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>Tắm cho thú</td>
-                                        <td>Bình An</td>
-                                        <td>Chó</td>
-                                        <td>100.000đ</td>
-                                        <td>1 ngày</td>
-                                        <td>2024-06-01</td>
-                                        <td>09:45:00</td>
-                                        <td>10:30:00</td>
+                                    {details.map((detail) => (
+                                        <tr key={detail.id}>
+                                        <td>{getServiceName(detail.serviceId)}</td>
+                                        <td>{getPetName(detail.petId)}</td>
+                                        <td>{getUserFullName(detail.userId)}</td>
+                                        <td>{detail.price}</td>
+                                        <td>{detail.phoneNumber}</td>
+                                        <td>{detail.time}</td>
+                                        <td>{detail.date}</td>
+                                        <td>{detail.startTime}</td>
+                                        <td>{detail.endTime}</td>
                                         <td
                                             style={{
                                                 padding: '0',
@@ -868,12 +1017,19 @@ function Admin() {
                                             >
                                                 Sửa
                                             </Buttons>
-                                            <Buttons className="delete-btn" rightIcon={<FontAwesomeIcon icon={faCheck} />}>
-                                                Hoàn thành
+                                            <Buttons
+                                                className="delete-btn"
+                                                rightIcon={
+                                                    <FontAwesomeIcon
+                                                        icon={faCheck}
+                                                    />
+                                                }
+                                            >
+                                                Lưu
                                             </Buttons>
                                         </td>
                                     </tr>
-                                    
+                                    ))}
                                 </tbody>
                             </table>
                         </>
@@ -891,7 +1047,7 @@ function Admin() {
                                         <th>Ngày</th>
                                         <th>Thời gian bắt đầu</th>
                                         <th>Thời gian kết thúc</th>
-                                        <th></th>
+                                        <th>Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -922,16 +1078,6 @@ function Admin() {
                                             >
                                                 Sửa
                                             </Buttons>
-                                            <Buttons
-                                                className="delete-btn"
-                                                rightIcon={
-                                                    <FontAwesomeIcon
-                                                        icon={faTrashCan}
-                                                    />
-                                                }
-                                            >
-                                                Xóa
-                                            </Buttons>
                                         </td>
                                     </tr>
                                     <tr>
@@ -960,16 +1106,6 @@ function Admin() {
                                                 }
                                             >
                                                 Sửa
-                                            </Buttons>
-                                            <Buttons
-                                                className="delete-btn"
-                                                rightIcon={
-                                                    <FontAwesomeIcon
-                                                        icon={faTrashCan}
-                                                    />
-                                                }
-                                            >
-                                                Xóa
                                             </Buttons>
                                         </td>
                                     </tr>
@@ -1475,6 +1611,126 @@ function Admin() {
                                     Hủy
                                 </Buttons>
                                 <Buttons onClick={handleAddUser}>Thêm</Buttons>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showDetailForm && (
+                <div className="edit-background">
+                    <div className="edit-container" ref={detailFormRef}>
+                        <h2>Chấp nhận dịch vụ</h2>
+                        <div className="edit-form">
+                            <div className="first">
+                                <div className="first-group">
+                                    <label>Mã dịch vụ</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="serviceId"
+                                            value={valueBooking.serviceId}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="first-group">
+                                    <label>Mã người dùng</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="userId"
+                                            value={valueBooking.userId}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="first-group">
+                                    <label>Mã vật nuôi</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="petId"
+                                            value={valueBooking.petId}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="second">
+                                <div className="second-group">
+                                    <label>Thời gian</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="time"
+                                            value={valueBooking.time}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="second-group">
+                                    <label>Ngày</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="date"
+                                            value={valueBooking.date}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="second">
+                                <div className="second-group">
+                                    <label>Thời gian bắt đầu</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="startTime"
+                                            value={valueBooking.startTime}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="second-group">
+                                    <label>Thời gian kết thúc</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="endTime"
+                                            value={valueBooking.endTime}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="second">
+                                <div className="second-group">
+                                    <label>Giá</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="price"
+                                            value={servicePrice}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="second-group">
+                                    <label>Số điện thoại</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="phoneNumber"
+                                            value={userPhone}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="form-actions">
+                                <Buttons className="exit-btn">Hủy</Buttons>
+                                <Buttons onClick={handleAddDetail}>Đặt</Buttons>
                             </div>
                         </div>
                     </div>

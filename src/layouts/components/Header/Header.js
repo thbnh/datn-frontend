@@ -13,8 +13,12 @@ import {
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import Notice from '../../../Components/Notice/notice';
+import { useState, useEffect } from 'react';
+import { handleGetDetailByUserIdApi } from '../../../service/detailService';
 
 function Header() {
+    const [details, setDetails] = useState([]);
+    const [userId, setUserId] = useState('');
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -36,6 +40,38 @@ function Header() {
         if (roleId === '1') return 'Nhân viên';
         return null;
     };
+
+    // Lấy userId từ localStorage
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const user = JSON.parse(storedUser);
+            setUserId(user.id);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (userId) {
+            const getDetailByUserId = async () => {
+                try {
+                    const data = await handleGetDetailByUserIdApi(userId);
+                    // Kiểm tra xem dữ liệu trả về có hợp lệ không
+                    if (data && Array.isArray(data)) {
+                        setDetails(data);
+                    } else {
+                        setDetails([]);
+                    }
+                } catch (error) {
+                    console.error(
+                        'Lỗi khi lấy danh sách lịch hẹn của bạn:',
+                        error,
+                    );
+                    setDetails([]);
+                }
+            };
+            getDetailByUserId();
+        }
+    }, [userId]);
 
     return (
         <header className="header">
@@ -88,7 +124,7 @@ function Header() {
                                             JSON.parse(inforUser).roleId,
                                         ) === 'Admin' ? (
                                             <Buttons
-                                            to={'/admin'}
+                                                to={'/admin'}
                                                 className="role-btn"
                                                 leftIcon={
                                                     <FontAwesomeIcon
@@ -112,15 +148,17 @@ function Header() {
                                                 Nhân viên
                                             </Buttons>
                                         ) : (
-                                            <Notice>
+                                            <Notice count={details.length}>
                                                 <div>
-                                                    <Buttons
-                                                        className="bell-btn"
-                                                        
-                                                    >
+                                                    <Buttons className="bell-btn">
                                                         <FontAwesomeIcon
-                                                                icon={faBell}
-                                                            />
+                                                            icon={faBell}
+                                                        />
+                                                        {details.length > 0 && (
+                                                            <span className="badge">
+                                                                {details.length}
+                                                            </span>
+                                                        )}
                                                     </Buttons>
                                                 </div>
                                             </Notice>

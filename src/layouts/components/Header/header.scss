@@ -63,12 +63,23 @@
                         min-width: 40px;
                         padding: 11px 15px;
                         color: var(--text-color-);
-
+                        position: relative;
                         &:hover {
                             color: var(--white-);
                             background-color: rgba(252, 252, 252, 0.3);
                         }
                     }
+                    .badge {
+                        position: absolute;
+                        top: 2px;
+                        right: 0%;
+                        background-color: var(--danger-);
+                        color: white;
+                        border-radius: 50%;
+                        padding: 1px 4px;
+                        font-size: 12px;
+                        
+                      }
                 }
             }
         }

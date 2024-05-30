@@ -60,7 +60,6 @@ function Login({ onSuccess }) {
                 setErrMessage(data.message);
             }
             if (data && data.errCode === 0) {
-                console.log(data);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 localStorage.setItem('token', data.token);
 
