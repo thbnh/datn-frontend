@@ -4,7 +4,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import slide from '../../assets/img/slide.png';
 import Buttons from '../../Components/Button/button';
-import { service } from '../../assets/image';
+import { serviceimg } from '../../assets/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faRightLong,
@@ -43,7 +43,7 @@ function Home() {
                         <div className="content-service">
                             <div className="col-md-7">
                                 <img
-                                    src={service.ser1}
+                                    src={serviceimg.ser1}
                                     alt="tắm"
                                     className="img"
                                 />
@@ -68,7 +68,7 @@ function Home() {
                         <div className="content-service">
                             <div className="col-md-7">
                                 <img
-                                    src={service.ser1}
+                                    src={serviceimg.ser1}
                                     alt="tắm"
                                     className="img"
                                 />
@@ -93,7 +93,7 @@ function Home() {
                         <div className="content-service">
                             <div className="col-md-7">
                                 <img
-                                    src={service.ser1}
+                                    src={serviceimg.ser1}
                                     alt="tắm"
                                     className="img"
                                 />
@@ -160,7 +160,7 @@ function Home() {
                         icon={faRightLong}
                         className="booking-icon"
                     />
-                    <Buttons className="booking-btn" mainbtn>
+                    <Buttons className="booking-btn" mainbtn to={'/booking'}>
                         Đặt dịch vụ
                     </Buttons>
                 </div>

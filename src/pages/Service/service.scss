@@ -21,6 +21,7 @@
 
             .content-text {
                 display: flex;
+                width: 100%;
                 padding-bottom: 60px;
                 border-bottom: 1px solid var(--border-color-);
                 + .content-text {

@@ -36,7 +36,9 @@ import bcrypt from 'bcryptjs';
 import {
     getDetailInforApi,
     handleAddDetailApi,
+    handleUpdateDetailApi,
 } from '../../service/detailService';
+import { handleAddHistoryApi } from '../../service/historyService';
 
 const salt = bcrypt.genSaltSync(10);
 const hashPassword = (password) => {
@@ -61,6 +63,7 @@ function Admin() {
     const [valuePet, setValuePet] = useState(null);
     const [valueService, setValueService] = useState(null);
     const [valueBooking, setValueBooking] = useState(null);
+    const [valueDetail, setValueDetail] = useState(null)
 
     const [activeTable, setActiveTable] = useState('');
     const [newUser, setNewUser] = useState({
@@ -89,11 +92,21 @@ function Admin() {
         startTime: '',
         endTime: '',
     });
+    const [newHistory, setNewHistory] = useState({
+        serviceId: '',
+        petId: '',
+        userId: '',
+        price: '',
+        phoneNumber: '',
+        time: '',
+        date: '',
+    });
     // Trạng thái để hiển thị Edit form
     const [showEditUserForm, setShowEditUserForm] = useState(false);
     const [showEditPetForm, setShowEditPetForm] = useState(false);
     const [showEditServiceForm, setShowEditServiceForm] = useState(false);
     const [showEditBookingForm, setShowEditBookingForm] = useState(false);
+    const [showEditDetailForm, setShowEditDetailForm] = useState(false);
     // Trạng thái để hiển thị Create form
     const [showUserForm, setShowUserForm] = useState(false);
     const [showServiceForm, setShowServiceForm] = useState(false);
@@ -118,6 +131,9 @@ function Admin() {
     const handleShowEditBookingForm = () => {
         setShowEditBookingForm(!showEditBookingForm);
     };
+    const handleShowEditDetailForm = () => {
+        setShowEditDetailForm(!showEditDetailForm);
+    };
     // Sự kiện hiển thị các Create form
     const handleShowUserForm = () => {
         setShowUserForm(!showUserForm);
@@ -133,6 +149,7 @@ function Admin() {
     const editPetFormRef = useRef(null);
     const editServiceFormRef = useRef(null);
     const editBookingFormRef = useRef(null);
+    const editDetailFormRef = useRef(null);
     const userFormRef = useRef(null);
     const serviceFormRef = useRef(null);
     const detailFormRef = useRef(null);
@@ -181,6 +198,12 @@ function Admin() {
         ) {
             setShowEditBookingForm(false);
         }
+        if (
+            editDetailFormRef.current &&
+            !editDetailFormRef.current.contains(event.target)
+        ) {
+            setShowEditDetailForm(false);
+        }
     };
     // Thay đổi dữ liệu khi nhập input
     const handleInputChange = (e) => {
@@ -201,6 +224,10 @@ function Admin() {
             ...prevBook,
             [name]: value,
         }));
+        setValueDetail((prevDetail) => ({
+            ...prevDetail,
+            [name]: value,
+        }));
         setNewUser((prevUser) => ({
             ...prevUser,
             [name]: value,
@@ -211,6 +238,10 @@ function Admin() {
         }));
         setNewDetail((prevDetail) => ({
             ...prevDetail,
+            [name]: value,
+        }));
+        setNewHistory((prevHistory) => ({
+            ...prevHistory,
             [name]: value,
         }));
     };
@@ -231,6 +262,10 @@ function Admin() {
         setValueBooking(booking);
         setShowEditBookingForm(true);
     };
+    const handleValueDetail = (detail) => {
+        setValueDetail(detail);
+        setShowEditDetailForm(true);
+    };
     const handleValueBookingFrom = (booking) => {
         setValueBooking(booking);
         const service = services.find(
@@ -245,6 +280,7 @@ function Admin() {
         }
         setShowDetailForm(true);
     };
+    // Lấy tên người dùng từ id
     const getUserFullName = (userId) => {
         const user = users.find((user) => user.id === userId);
         return user ? user.fullName : 'N/A';
@@ -259,7 +295,7 @@ function Admin() {
         const service = services.find((service) => service.id === serviceId);
         return service ? service.serviceName : 'N/A';
     };
-    // User
+    // User CRUD
     useEffect(() => {
         const getUserInfor = async () => {
             try {
@@ -272,7 +308,6 @@ function Admin() {
 
         getUserInfor();
     }, []);
-
     const handleAddUser = async () => {
         try {
             const hashedPassword = await hashPassword(newUser.password);
@@ -297,7 +332,6 @@ function Admin() {
             toast.error('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
         }
     };
-
     const handleDeleteUser = async (userId) => {
         try {
             const data = await handleDeleteUserApi(userId);
@@ -312,7 +346,6 @@ function Admin() {
             toast.error('Đã xảy ra lỗi khi xóa người dùng');
         }
     };
-
     const handleUpdateUser = async () => {
         try {
             const data = await handleUpdateUserApi(valueUser.id, valueUser);
@@ -344,7 +377,6 @@ function Admin() {
         };
         getServiceInfor();
     }, []);
-
     const handleAddService = async () => {
         try {
             const data = await handleAddServiceApi(
@@ -365,7 +397,6 @@ function Admin() {
             toast.error('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
         }
     };
-
     const handleUpdateService = async () => {
         try {
             const data = await handleUpdateServiceApi(
@@ -388,7 +419,6 @@ function Admin() {
             toast.error('Đã xảy ra lỗi khi cập nhật dịch vụ');
         }
     };
-
     const handleDeleteService = async (serviceId) => {
         try {
             const data = await handleDeleteServiceApi(serviceId);
@@ -417,7 +447,6 @@ function Admin() {
         };
         getPetInfor();
     }, []);
-
     const handleUpdatePet = async () => {
         try {
             const data = await handleUpdatePetApi(valuePet.id, valuePet);
@@ -438,7 +467,6 @@ function Admin() {
             toast.error('Đã xảy ra lỗi khi cập nhật vật nuôi');
         }
     };
-
     const handleDeletePet = async (petId) => {
         try {
             const data = await handleDeletePetApi(petId);
@@ -465,7 +493,6 @@ function Admin() {
         };
         getBookingInfor();
     }, []);
-
     const handleUpdateBooking = async () => {
         try {
             const data = await handleUpdateBookingApi(
@@ -485,7 +512,6 @@ function Admin() {
             }
         } catch (error) {}
     };
-
     const handleDeleteBooking = async (bookingId) => {
         try {
             const data = await handleDeleteBookingApi(bookingId);
@@ -540,6 +566,51 @@ function Admin() {
             toast.error('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
         }
     };
+    const handleUpdateDetail = async () => {
+        try {
+            const data = await handleUpdateDetailApi(valueDetail.id, valueDetail);
+            console.log(data);
+            if (data.status === '200') {
+                setDetails(
+                    details.map((detail) =>
+                        detail.id === valueDetail.id ? valueDetail : detail,
+                    ),
+                );
+                setShowEditDetailForm(false);
+                toast.success('Cập nhật thông tin Chi tiết thành công');
+            } else {
+                toast.error(`Cập nhật không thành công: ${data.errMessage}`);
+            }
+        } catch (error) {
+            console.error('Lỗi khi cập nhật Chi tiết:', error);
+            toast.error('Đã xảy ra lỗi khi cập nhật Chi tiết');
+        }
+    }
+
+    const handleAddHistory = async () => {
+        try {
+            const data = await handleAddHistoryApi(
+                (newHistory.serviceId = valueDetail.serviceId),
+                (newHistory.petId = valueDetail.petId),
+                (newHistory.userId = valueDetail.userId),
+                (newHistory.price = valueDetail.price),
+                (newHistory.phoneNumber = valueDetail.phoneNumber),
+                (newHistory.time = valueDetail.time),
+                (newHistory.date = valueDetail.date),
+            )
+            if (data && data.status === '200') {
+                console.log('Lưu thành công');
+                toast.success('Lưu thành công!');
+                handleShowDetailForm();
+            } else {
+                console.error('Lưu thất bại:', data?.data?.errMessage);
+                toast.error('Lưu thất bại. Vui lòng thử lại.');
+            }
+        } catch (error) {
+            console.error('Lỗi khi lưu lịch sử:', error);
+            toast.error('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+        }
+    }
     // Hàm để tạo các ngày trong tuần
     const generateDateOptions = () => {
         const today = new Date();
@@ -591,6 +662,7 @@ function Admin() {
                         showEditPetForm ||
                         showEditServiceForm ||
                         showEditBookingForm ||
+                        showEditDetailForm ||
                         showUserForm ||
                         showServiceForm ||
                         showDetailForm
@@ -715,7 +787,7 @@ function Admin() {
                                                 >
                                                     Xóa
                                                 </Buttons>
-                                                <Buttons
+                                                {/* <Buttons
                                                     className="add-btn"
                                                     rightIcon={
                                                         <FontAwesomeIcon
@@ -724,7 +796,7 @@ function Admin() {
                                                     }
                                                 >
                                                     Thêm
-                                                </Buttons>
+                                                </Buttons> */}
                                             </td>
                                         </tr>
                                     ))}
@@ -1009,6 +1081,7 @@ function Admin() {
                                         >
                                             <Buttons
                                                 className="edit-btn"
+                                                onClick={() => handleValueDetail(detail)}
                                                 rightIcon={
                                                     <FontAwesomeIcon
                                                         icon={faPen}
@@ -1016,16 +1089,6 @@ function Admin() {
                                                 }
                                             >
                                                 Sửa
-                                            </Buttons>
-                                            <Buttons
-                                                className="delete-btn"
-                                                rightIcon={
-                                                    <FontAwesomeIcon
-                                                        icon={faCheck}
-                                                    />
-                                                }
-                                            >
-                                                Lưu
                                             </Buttons>
                                         </td>
                                     </tr>
@@ -1731,6 +1794,127 @@ function Admin() {
                             <div className="form-actions">
                                 <Buttons className="exit-btn">Hủy</Buttons>
                                 <Buttons onClick={handleAddDetail}>Đặt</Buttons>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showEditDetailForm && (
+                <div className="edit-background">
+                    <div className="edit-container" ref={editDetailFormRef}>
+                        <h2>Sửa thông tin chi tiết</h2>
+                        <div className="edit-form">
+                            <div className="first">
+                                <div className="first-group">
+                                    <label>Mã dịch vụ</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="serviceId"
+                                            value={valueDetail.serviceId}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="first-group">
+                                    <label>Mã người dùng</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="userId"
+                                            value={valueDetail.userId}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="first-group">
+                                    <label>Mã vật nuôi</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="petId"
+                                            value={valueDetail.petId}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="second">
+                                <div className="second-group">
+                                    <label>Thời gian</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="time"
+                                            value={valueDetail.time}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="second-group">
+                                    <label>Ngày</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="date"
+                                            value={valueDetail.date}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="second">
+                                <div className="second-group">
+                                    <label>Thời gian bắt đầu</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="startTime"
+                                            value={valueDetail.startTime}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="second-group">
+                                    <label>Thời gian kết thúc</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="endTime"
+                                            value={valueDetail.endTime}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="second">
+                                <div className="second-group">
+                                    <label>Giá</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="price"
+                                            value={valueDetail.price}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="second-group">
+                                    <label>Số điện thoại</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="text"
+                                            name="phoneNumber"
+                                            value={valueDetail.phoneNumber}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="form-actions">
+                                <Buttons className="exit-btn" onClick={handleShowEditDetailForm}>Hủy</Buttons>
+                                <Buttons onClick={handleUpdateDetail}>Sửa</Buttons>
+                                <Buttons className='save-btn' onClick={handleAddHistory}>Lưu</Buttons>
                             </div>
                         </div>
                     </div>

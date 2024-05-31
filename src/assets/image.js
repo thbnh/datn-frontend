@@ -1,3 +1,4 @@
-export const service = {
-    ser1: require('./img/tam.jpg')
+export const serviceimg = {
+    ser1: require('./img/tam.jpg'),
+    ser2: require('./img/cut.jpg')
 }

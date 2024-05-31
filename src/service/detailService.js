@@ -50,8 +50,12 @@ const handleAddDetailApi = (
     });
 };
 
+const handleUpdateDetailApi = (detailId, detailData) => {
+    return axios.put(`/api/update-detail/${detailId}`, detailData);
+};
+
 const handleGetDetailByUserIdApi = (userId) => {
     return axios.get(`/api/get-detail/${userId}`);
 }
 
-export { handleAddDetailApi, getDetailInforApi, handleGetDetailByUserIdApi };
+export { handleAddDetailApi, getDetailInforApi, handleGetDetailByUserIdApi, handleUpdateDetailApi };

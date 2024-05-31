@@ -1,86 +1,43 @@
 import './service.scss';
 import Buttons from '../../Components/Button/button';
-import { service } from '../../assets/image';
+import { serviceimg } from '../../assets/image';
+import { useState, useEffect } from 'react';
+import { getServiceInforApi } from '../../service/servService';
 
 function Service() {
+    const [services, setServices] = useState([]);
+
+    useEffect(() => {
+        const getServiceInfor = async () => {
+            try {
+                const serviceData = await getServiceInforApi();
+                setServices(serviceData);
+            } catch (error) {
+                console.error('Lỗi khi lấy dữ liệu dịch vụ:', error);
+            }
+        };
+        getServiceInfor();
+    }, []);
     return (
         <div className="container-service">
             <div className="content-service">
                 <div className="content-menu">
                     <h1 className="content-title">Dịch vụ thú cưng</h1>
-                    <div className="content-text">
-                        <div className="col-md-7">
-                            <img src={service.ser1} alt="tắm" className="img" />
+                    {services.map((service, index) => (
+                        <div key={index} className="content-text">
+                            <div className="col-md-7">
+                            <img src={serviceimg.ser1} alt="tắm" className="img" />
+                            </div>
+                            <div className="col-md-5 right">
+                                <h1>{service.serviceName}</h1>
+                                <p>{service.price}</p>
+                                <p>{service.description}</p>
+                                <Buttons className="booking-btn" mainbtn to={'/booking'}>
+                                    Đặt dịch vụ
+                                </Buttons>
+                            </div>
                         </div>
-                        <div className="col-md-5 right">
-                            <h1>Tắm Spa cho thú</h1>
-                            <p>Dịch vụ trọn gói:</p>
-                            <p>
-                                Tắm, vắt tuyến hôi, sấy khô, chải lông rối, nhổ
-                                lông tai, vệ sinh tai,
-                            </p>
-                            <p>
-                                Tắm, vắt tuyến hôi, sấy khô, chải lông rối, nhổ
-                                lông tai, vệ sinh tai,
-                            </p>
-                            <p>
-                                Tắm, vắt tuyến hôi, sấy khô, chải lông rối, nhổ
-                                lông tai, vệ sinh tai,
-                            </p>
-                            <Buttons className="booking-btn" mainbtn>
-                                Đặt dịch vụ
-                            </Buttons>
-                        </div>
-                    </div>
-                    <div className="content-text">
-                        <div className="col-md-5 right">
-                            <h1>Tắm Spa cho thú</h1>
-                            <p>Dịch vụ trọn gói:</p>
-                            <p>
-                                Tắm, vắt tuyến hôi, sấy khô, chải lông rối, nhổ
-                                lông tai, vệ sinh tai,
-                            </p>
-                            <p>
-                                Tắm, vắt tuyến hôi, sấy khô, chải lông rối, nhổ
-                                lông tai, vệ sinh tai,
-                            </p>
-                            <p>
-                                Tắm, vắt tuyến hôi, sấy khô, chải lông rối, nhổ
-                                lông tai, vệ sinh tai,
-                            </p>
-                            <Buttons className="booking-btn" mainbtn>
-                                Đặt dịch vụ
-                            </Buttons>
-                        </div>
-                        <div className="col-md-7">
-                            <img src={service.ser1} alt="tắm" className="img" />
-                        </div>
-                    </div>
-
-                    <div className="content-text">
-                        <div className="col-md-7">
-                            <img src={service.ser1} alt="tắm" className="img" />
-                        </div>
-                        <div className="col-md-5 right">
-                            <h1>Tắm Spa cho thú</h1>
-                            <p>Dịch vụ trọn gói:</p>
-                            <p>
-                                Tắm, vắt tuyến hôi, sấy khô, chải lông rối, nhổ
-                                lông tai, vệ sinh tai,
-                            </p>
-                            <p>
-                                Tắm, vắt tuyến hôi, sấy khô, chải lông rối, nhổ
-                                lông tai, vệ sinh tai,
-                            </p>
-                            <p>
-                                Tắm, vắt tuyến hôi, sấy khô, chải lông rối, nhổ
-                                lông tai, vệ sinh tai,
-                            </p>
-                            <Buttons className="booking-btn" mainbtn>
-                                Đặt dịch vụ
-                            </Buttons>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             </div>
         </div>
