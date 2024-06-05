@@ -112,7 +112,7 @@ function Notice({ children }) {
                                 <hr />
                                 <div className="notice-wrapper">
                                     {details.length > 0 && details.map((detail) => (
-                                        <div key={detail.id}>
+                                        <div key={detail.id} className='notice-detail'>
                                             <p>
                                                 Dịch vụ:{' '}
                                                 {getServiceName(

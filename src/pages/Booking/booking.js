@@ -58,7 +58,7 @@ function Booking() {
     const generateTimeOptions = () => {
         const times = [];
         for (let hour = 8; hour < 22; hour++) {
-            for (let minute = 0; minute < 60; minute += 15) {
+            for (let minute = 0; minute < 60; minute += 30) {
                 const time = `${String(hour).padStart(2, '0')}:${String(
                     minute,
                 ).padStart(2, '0')}:00`;
@@ -259,7 +259,7 @@ function Booking() {
                                                     </div>
                                                 </div>
                                                 <div className="second-group">
-                                                    <label>Thời gian</label>
+                                                    <label>Thời gian (ngày)</label>
                                                     <div className="input-group">
                                                         <input
                                                             type="text"

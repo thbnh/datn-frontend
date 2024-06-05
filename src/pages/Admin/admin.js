@@ -447,6 +447,7 @@ function Admin() {
         };
         getPetInfor();
     }, []);
+    
     const handleUpdatePet = async () => {
         try {
             const data = await handleUpdatePetApi(valuePet.id, valuePet);
@@ -1114,64 +1115,7 @@ function Admin() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>Tỉa lông cho thú</td>
-                                        <td>Bình An</td>
-                                        <td>Mèo</td>
-                                        <td>100.000đ</td>
-                                        <td>1 ngày</td>
-                                        <td>2024-06-01</td>
-                                        <td>09:45:00</td>
-                                        <td>10:30:00</td>
-                                        <td
-                                            style={{
-                                                padding: '0',
-                                                display: 'flex',
-                                                width: '100%',
-                                                border: 'none',
-                                            }}
-                                        >
-                                            <Buttons
-                                                className="edit-btn"
-                                                rightIcon={
-                                                    <FontAwesomeIcon
-                                                        icon={faPen}
-                                                    />
-                                                }
-                                            >
-                                                Sửa
-                                            </Buttons>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tắm cho thú</td>
-                                        <td>Thanh Bình</td>
-                                        <td>Chó</td>
-                                        <td>150.000đ</td>
-                                        <td>trong ngày</td>
-                                        <td>2024-06-01</td>
-                                        <td>09:45:00</td>
-                                        <td>10:30:00</td>
-                                        <td
-                                            style={{
-                                                padding: '0',
-                                                display: 'flex',
-                                                width: '100%',
-                                                border: 'none',
-                                            }}
-                                        >
-                                            <Buttons
-                                                className="edit-btn"
-                                                rightIcon={
-                                                    <FontAwesomeIcon
-                                                        icon={faPen}
-                                                    />
-                                                }
-                                            >
-                                                Sửa
-                                            </Buttons>
-                                        </td>
-                                    </tr>
+                                    
                                 </tbody>
                             </table>
                         </>
