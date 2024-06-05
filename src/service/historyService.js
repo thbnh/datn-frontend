@@ -1,5 +1,26 @@
-import axios from "axios";
+import axios from '../axios';
 
+const getHistoryInforApi = (
+    historyId,
+    serviceId,
+    petId,
+    userId,
+    price,
+    phoneNumber,
+    time,
+    date,
+) => {
+    return axios.get('/api/history-information', {
+        id: historyId,
+        serviceId: serviceId,
+        petId: petId,
+        userId: userId,
+        price: price,
+        phoneNumber: phoneNumber,
+        time: time,
+        date: date,
+    });
+};
 const handleAddHistoryApi = (
     serviceId,
     petId,
@@ -20,4 +41,4 @@ const handleAddHistoryApi = (
     });
 };
 
-export {handleAddHistoryApi}
+export { handleAddHistoryApi, getHistoryInforApi };

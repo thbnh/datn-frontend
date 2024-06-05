@@ -26,7 +26,7 @@ function Navmenu() {
                 Đặt dịch vụ
             </Buttons>
             <Buttons to navbtn className="nav-item">
-                Thông tin của cúng tôi
+                Thông tin của chúng tôi
             </Buttons>
         </div>
     );

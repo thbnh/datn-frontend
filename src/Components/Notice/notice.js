@@ -1,50 +1,50 @@
 import Tippy from '@tippyjs/react/headless';
 import './notice.scss';
-import {
-    
-    handleGetDetailByUserIdApi,
-} from '../../service/detailService';
+import { handleGetDetailByUserIdApi } from '../../service/detailService';
 import { useState, useEffect } from 'react';
 import { getPetInforApi } from '../../service/petService';
 import { getServiceInforApi } from '../../service/servService';
+import Buttons from '../Button/button';
 
 function Notice({ children }) {
     const [pets, setPets] = useState([]);
     const [services, setServices] = useState([]);
     const [details, setDetails] = useState([]);
-    const [userId, setUserId] = useState('');
+    const [user, setUser] = useState(null);
+    const [isExpanded, setIsExpanded] = useState(false);
 
-    // Lấy userId từ localStorage
+    // Lấy user từ localStorage
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
-            const user = JSON.parse(storedUser);
-            setUserId(user.id);
+            setUser(JSON.parse(storedUser));
         }
     }, []);
 
     useEffect(() => {
-        if (userId) {
-            const getDetailByUserId = async () => {
+        if (user && user.id) {
+            const getDetails = async () => {
                 try {
-                    const data = await handleGetDetailByUserIdApi(userId);
-                    // Kiểm tra xem dữ liệu trả về có hợp lệ không
+                    const data = await handleGetDetailByUserIdApi(user.id);
                     if (data && Array.isArray(data)) {
                         setDetails(data);
                     } else {
                         setDetails([]);
                     }
                 } catch (error) {
-                    console.error('Lỗi khi lấy danh sách lịch hẹn của bạn:', error);
+                    console.error(
+                        'Lỗi khi lấy danh sách lịch hẹn của bạn:',
+                        error,
+                    );
                     setDetails([]);
                 }
-            }
-            getDetailByUserId();
+            };
+            getDetails();
         }
-    }, [userId]);
-    
+    }, [user]);
+
     useEffect(() => {
-        const getPetInfor = async () => {
+        const getPetInfo = async () => {
             try {
                 const petData = await getPetInforApi();
                 setPets(petData);
@@ -52,9 +52,8 @@ function Notice({ children }) {
                 console.error('Lỗi khi lấy dữ liệu thú nuôi:', error);
             }
         };
-        getPetInfor();
 
-        const getServiceInfor = async () => {
+        const getServiceInfo = async () => {
             try {
                 const serviceData = await getServiceInforApi();
                 setServices(serviceData);
@@ -62,7 +61,9 @@ function Notice({ children }) {
                 console.error('Lỗi khi lấy dữ liệu dịch vụ:', error);
             }
         };
-        getServiceInfor();
+
+        getPetInfo();
+        getServiceInfo();
     }, []);
 
     const getPetName = (petId) => {
@@ -76,12 +77,7 @@ function Notice({ children }) {
     };
 
     const getUserFullName = () => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            const user = JSON.parse(storedUser);
-            return user.fullName;
-        }
-        return 'N/A';
+        return user ? user.fullName : 'N/A';
     };
 
     // Hàm tính toán khoảng thời gian giữa startTime và endTime
@@ -108,35 +104,77 @@ function Notice({ children }) {
                             {...attrs}
                         >
                             <div className="dropdown-wrapper">
-                            <h3>{details.length > 0 ? 'Bạn đã đặt dịch vụ thành công' : 'Bạn chưa đặt dịch vụ'}</h3>
-                                <hr />
-                                <div className="notice-wrapper">
-                                    {details.length > 0 && details.map((detail) => (
-                                        <div key={detail.id} className='notice-detail'>
-                                            <p>
-                                                Dịch vụ:{' '}
-                                                {getServiceName(
-                                                    detail.serviceId,
-                                                )}
-                                            </p>
-                                            <p>
-                                                Tên thú nuôi:{' '}
-                                                {getPetName(detail.petId)}
-                                            </p>
-                                            <p>
-                                                Tên người dùng:{' '}
-                                                {getUserFullName()}
-                                            </p>
-                                            <p>Giá: {detail.price}đ</p>
-                                            <p>
-                                                Ngày:{' '}
-                                                {new Date(
-                                                    detail.date,
-                                                ).toLocaleDateString()}
-                                            </p>
-                                            <p>Thời gian: {calculateDuration(detail.startTime, detail.endTime)}</p>
-                                        </div>
-                                    ))}
+                                <div className="notice-success">
+                                    <h3>
+                                        {details.length > 0
+                                            ? 'Dịch vụ được đặt thành công'
+                                            : 'Bạn chưa đặt dịch vụ thành công'}
+                                    </h3>
+                                    <hr />
+                                    <div
+                                        className="notice-wrapper"
+                                        style={{ maxHeight: isExpanded ? '400px' : '120px', overflowY: isExpanded ? 'auto' : 'hidden' }}
+                                    >
+                                        {details.length > 0 &&
+                                            details
+                                                .slice(
+                                                    0,
+                                                    isExpanded
+                                                        ? details.length
+                                                        : 1,
+                                                )
+                                                .map((detail) => (
+                                                    <div
+                                                        key={detail.id}
+                                                        className="notice-detail"
+                                                    >
+                                                        <p>
+                                                            Dịch vụ:{' '}
+                                                            {getServiceName(
+                                                                detail.serviceId,
+                                                            )}
+                                                        </p>
+                                                        <p>
+                                                            Tên thú nuôi:{' '}
+                                                            {getPetName(
+                                                                detail.petId,
+                                                            )}
+                                                        </p>
+                                                        <p>
+                                                            Tên người dùng:{' '}
+                                                            {getUserFullName()}
+                                                        </p>
+                                                        <p>
+                                                            Giá: {detail.price}đ
+                                                        </p>
+                                                        <p>
+                                                            Ngày:{' '}
+                                                            {new Date(
+                                                                detail.date,
+                                                            ).toLocaleDateString()}
+                                                        </p>
+                                                        <p>
+                                                            Thời gian:{' '}
+                                                            {calculateDuration(
+                                                                detail.startTime,
+                                                                detail.endTime,
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                    </div>
+                                    {details.length > 1 && (
+                                        <Buttons
+                                            className="dropdown-btn"
+                                            onClick={() =>
+                                                setIsExpanded(!isExpanded)
+                                            }
+                                        >
+                                            {isExpanded
+                                                ? 'Thu gọn'
+                                                : 'Xem thêm'}
+                                        </Buttons>
+                                    )}
                                 </div>
                             </div>
                         </div>

@@ -21,8 +21,6 @@ import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faCalendarDays,
-    faCheck,
-    faPaw,
     faPen,
     faTrashCan,
 } from '@fortawesome/free-solid-svg-icons';
@@ -38,7 +36,10 @@ import {
     handleAddDetailApi,
     handleUpdateDetailApi,
 } from '../../service/detailService';
-import { handleAddHistoryApi } from '../../service/historyService';
+import {
+    getHistoryInforApi,
+    handleAddHistoryApi,
+} from '../../service/historyService';
 
 const salt = bcrypt.genSaltSync(10);
 const hashPassword = (password) => {
@@ -58,12 +59,13 @@ function Admin() {
     const [services, setServices] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [details, setDetails] = useState([]);
+    const [historys, setHistorys] = useState([]);
 
     const [valueUser, setValueUser] = useState(null);
     const [valuePet, setValuePet] = useState(null);
     const [valueService, setValueService] = useState(null);
     const [valueBooking, setValueBooking] = useState(null);
-    const [valueDetail, setValueDetail] = useState(null)
+    const [valueDetail, setValueDetail] = useState(null);
 
     const [activeTable, setActiveTable] = useState('');
     const [newUser, setNewUser] = useState({
@@ -447,7 +449,7 @@ function Admin() {
         };
         getPetInfor();
     }, []);
-    
+
     const handleUpdatePet = async () => {
         try {
             const data = await handleUpdatePetApi(valuePet.id, valuePet);
@@ -569,7 +571,10 @@ function Admin() {
     };
     const handleUpdateDetail = async () => {
         try {
-            const data = await handleUpdateDetailApi(valueDetail.id, valueDetail);
+            const data = await handleUpdateDetailApi(
+                valueDetail.id,
+                valueDetail,
+            );
             console.log(data);
             if (data.status === '200') {
                 setDetails(
@@ -586,8 +591,19 @@ function Admin() {
             console.error('Lỗi khi cập nhật Chi tiết:', error);
             toast.error('Đã xảy ra lỗi khi cập nhật Chi tiết');
         }
-    }
-
+    };
+    // History
+    useEffect(() => {
+        const getHistoryInfor = async () => {
+            try {
+                const historyData = await getHistoryInforApi();
+                setHistorys(historyData);
+            } catch (error) {
+                console.error('Lỗi khi lấy dữ liệu chi tiết lịch sử:', error);
+            }
+        };
+        getHistoryInfor();
+    }, []);
     const handleAddHistory = async () => {
         try {
             const data = await handleAddHistoryApi(
@@ -598,7 +614,7 @@ function Admin() {
                 (newHistory.phoneNumber = valueDetail.phoneNumber),
                 (newHistory.time = valueDetail.time),
                 (newHistory.date = valueDetail.date),
-            )
+            );
             if (data && data.status === '200') {
                 console.log('Lưu thành công');
                 toast.success('Lưu thành công!');
@@ -611,7 +627,7 @@ function Admin() {
             console.error('Lỗi khi lưu lịch sử:', error);
             toast.error('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
         }
-    }
+    };
     // Hàm để tạo các ngày trong tuần
     const generateDateOptions = () => {
         const today = new Date();
@@ -1053,7 +1069,7 @@ function Admin() {
                                         <th>Tên người dùng</th>
                                         <th>Giá</th>
                                         <th>Số điện thoại</th>
-                                        <th>Thời gian</th>
+                                        <th>Thời gian (ngày)</th>
                                         <th>Ngày</th>
                                         <th>Thời gian bắt đầu</th>
                                         <th>Thời gian kết thúc</th>
@@ -1063,36 +1079,46 @@ function Admin() {
                                 <tbody>
                                     {details.map((detail) => (
                                         <tr key={detail.id}>
-                                        <td>{getServiceName(detail.serviceId)}</td>
-                                        <td>{getPetName(detail.petId)}</td>
-                                        <td>{getUserFullName(detail.userId)}</td>
-                                        <td>{detail.price}</td>
-                                        <td>{detail.phoneNumber}</td>
-                                        <td>{detail.time}</td>
-                                        <td>{detail.date}</td>
-                                        <td>{detail.startTime}</td>
-                                        <td>{detail.endTime}</td>
-                                        <td
-                                            style={{
-                                                padding: '0',
-                                                display: 'flex',
-                                                width: '100%',
-                                                border: 'none',
-                                            }}
-                                        >
-                                            <Buttons
-                                                className="edit-btn"
-                                                onClick={() => handleValueDetail(detail)}
-                                                rightIcon={
-                                                    <FontAwesomeIcon
-                                                        icon={faPen}
-                                                    />
-                                                }
+                                            <td>
+                                                {getServiceName(
+                                                    detail.serviceId,
+                                                )}
+                                            </td>
+                                            <td>{getPetName(detail.petId)}</td>
+                                            <td>
+                                                {getUserFullName(detail.userId)}
+                                            </td>
+                                            <td>{detail.price}</td>
+                                            <td>{detail.phoneNumber}</td>
+                                            <td>{detail.time}</td>
+                                            <td>{detail.date}</td>
+                                            <td>{detail.startTime}</td>
+                                            <td>{detail.endTime}</td>
+                                            <td
+                                                style={{
+                                                    padding: '0',
+                                                    display: 'flex',
+                                                    width: '100%',
+                                                    border: 'none',
+                                                }}
                                             >
-                                                Sửa
-                                            </Buttons>
-                                        </td>
-                                    </tr>
+                                                <Buttons
+                                                    className="edit-btn"
+                                                    onClick={() =>
+                                                        handleValueDetail(
+                                                            detail,
+                                                        )
+                                                    }
+                                                    rightIcon={
+                                                        <FontAwesomeIcon
+                                                            icon={faPen}
+                                                        />
+                                                    }
+                                                >
+                                                    Sửa
+                                                </Buttons>
+                                            </td>
+                                        </tr>
                                     ))}
                                 </tbody>
                             </table>
@@ -1109,13 +1135,48 @@ function Admin() {
                                         <th>Giá</th>
                                         <th>Thời gian</th>
                                         <th>Ngày</th>
-                                        <th>Thời gian bắt đầu</th>
-                                        <th>Thời gian kết thúc</th>
+                                        <th>Số điện thoại</th>
                                         <th>Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    
+                                    {historys.map((history) => (
+                                        <tr key={history.id}>
+                                            <td>
+                                                {getServiceName(
+                                                    history.serviceId,
+                                                )}
+                                            </td>
+                                            <td>{getPetName(history.petId)}</td>
+                                            <td>
+                                                {getUserFullName(history.userId)}
+                                            </td>
+                                            <td>{history.price}</td>
+                                            <td>{history.phoneNumber}</td>
+                                            <td>{history.time}</td>
+                                            <td>{history.date}</td>
+                                            <td
+                                                style={{
+                                                    padding: '0',
+                                                    display: 'flex',
+                                                    width: '100%',
+                                                    border: 'none',
+                                                }}
+                                            >
+                                                <Buttons
+                                                    className="edit-btn"
+                                                    
+                                                    rightIcon={
+                                                        <FontAwesomeIcon
+                                                            icon={faPen}
+                                                        />
+                                                    }
+                                                >
+                                                    Sửa
+                                                </Buttons>
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </>
@@ -1856,9 +1917,21 @@ function Admin() {
                                 </div>
                             </div>
                             <div className="form-actions">
-                                <Buttons className="exit-btn" onClick={handleShowEditDetailForm}>Hủy</Buttons>
-                                <Buttons onClick={handleUpdateDetail}>Sửa</Buttons>
-                                <Buttons className='save-btn' onClick={handleAddHistory}>Lưu</Buttons>
+                                <Buttons
+                                    className="exit-btn"
+                                    onClick={handleShowEditDetailForm}
+                                >
+                                    Hủy
+                                </Buttons>
+                                <Buttons onClick={handleUpdateDetail}>
+                                    Sửa
+                                </Buttons>
+                                <Buttons
+                                    className="save-btn"
+                                    onClick={handleAddHistory}
+                                >
+                                    Lưu
+                                </Buttons>
                             </div>
                         </div>
                     </div>
