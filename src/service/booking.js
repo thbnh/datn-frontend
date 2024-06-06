@@ -29,12 +29,11 @@ const handleUpdateBookingApi = (bookingtId, bookingData) => {
     return axios.put(`/api/update-booking/${bookingtId}`, bookingData);
 };
 const handleDeleteBookingApi = (bookingtId) => {
-    return axios.delete(`/api/delete-booking/${bookingtId}`)
+    return axios.delete(`/api/delete-booking/${bookingtId}`);
 };
 
-export {
-    getBookingInforApi,
-    handleAddBookingApi,
-    handleUpdateBookingApi,
-    handleDeleteBookingApi,
-}
+const getBookingByUserIdApi = (userId) => {
+    return axios.get(`/api/get-booking/${userId}`);
+};
+
+export { getBookingInforApi, handleAddBookingApi, handleUpdateBookingApi, handleDeleteBookingApi, getBookingByUserIdApi };

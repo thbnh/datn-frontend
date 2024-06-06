@@ -1,45 +1,22 @@
 import './admin.scss';
 import Buttons from '../../Components/Button/button';
-import {
-    getUserInforApi,
-    handleDeleteUserApi,
-    handleSignupApi,
-    handleUpdateUserApi,
-} from '../../service/userService';
+import { getUserInforApi, handleDeleteUserApi, handleSignupApi, handleUpdateUserApi } from '../../service/userService';
 import {
     getServiceInforApi,
     handleAddServiceApi,
     handleDeleteServiceApi,
     handleUpdateServiceApi,
 } from '../../service/servService';
-import {
-    getPetInforApi,
-    handleDeletePetApi,
-    handleUpdatePetApi,
-} from '../../service/petService';
+import { getPetInforApi, handleDeletePetApi, handleUpdatePetApi } from '../../service/petService';
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-    faCalendarDays,
-    faPen,
-    faTrashCan,
-} from '@fortawesome/free-solid-svg-icons';
+import { faCalendarDays, faPen, faTrashCan, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { ToastContainer, toast } from 'react-toastify';
-import {
-    getBookingInforApi,
-    handleDeleteBookingApi,
-    handleUpdateBookingApi,
-} from '../../service/booking';
+import { getBookingInforApi, handleDeleteBookingApi, handleUpdateBookingApi } from '../../service/booking';
 import bcrypt from 'bcryptjs';
-import {
-    getDetailInforApi,
-    handleAddDetailApi,
-    handleUpdateDetailApi,
-} from '../../service/detailService';
-import {
-    getHistoryInforApi,
-    handleAddHistoryApi,
-} from '../../service/historyService';
+import { getDetailInforApi, handleAddDetailApi, handleUpdateDetailApi } from '../../service/detailService';
+import { getHistoryInforApi, handleAddHistoryApi } from '../../service/historyService';
+import { SearchIcon } from '../../Components/Icons';
 
 const salt = bcrypt.genSaltSync(10);
 const hashPassword = (password) => {
@@ -103,6 +80,9 @@ function Admin() {
         time: '',
         date: '',
     });
+
+    const [searchUser, setSearchUser] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState([]);
     // Trạng thái để hiển thị Edit form
     const [showEditUserForm, setShowEditUserForm] = useState(false);
     const [showEditPetForm, setShowEditPetForm] = useState(false);
@@ -116,6 +96,7 @@ function Admin() {
 
     const [servicePrice, setServicePrice] = useState('');
     const [userPhone, setUserPhone] = useState('');
+
     // Sự kiện đóng mở bảng dữ liệu
     const handleShowTable = (table) => {
         setActiveTable(activeTable === table ? '' : table);
@@ -156,54 +137,31 @@ function Admin() {
     const serviceFormRef = useRef(null);
     const detailFormRef = useRef(null);
 
+    const inputRef = useRef();
     // Sư kiện Click ra ngoài thoát overlay
     const handleOutClick = (event) => {
-        if (
-            serviceFormRef.current &&
-            !serviceFormRef.current.contains(event.target)
-        ) {
+        if (serviceFormRef.current && !serviceFormRef.current.contains(event.target)) {
             setShowServiceForm(false);
         }
-        if (
-            userFormRef.current &&
-            !userFormRef.current.contains(event.target)
-        ) {
+        if (userFormRef.current && !userFormRef.current.contains(event.target)) {
             setShowUserForm(false);
         }
-        if (
-            detailFormRef.current &&
-            !detailFormRef.current.contains(event.target)
-        ) {
+        if (detailFormRef.current && !detailFormRef.current.contains(event.target)) {
             setShowDetailForm(false);
         }
-        if (
-            editUserFormRef.current &&
-            !editUserFormRef.current.contains(event.target)
-        ) {
+        if (editUserFormRef.current && !editUserFormRef.current.contains(event.target)) {
             setShowEditUserForm(false);
         }
-        if (
-            editPetFormRef.current &&
-            !editPetFormRef.current.contains(event.target)
-        ) {
+        if (editPetFormRef.current && !editPetFormRef.current.contains(event.target)) {
             setShowEditPetForm(false);
         }
-        if (
-            editServiceFormRef.current &&
-            !editServiceFormRef.current.contains(event.target)
-        ) {
+        if (editServiceFormRef.current && !editServiceFormRef.current.contains(event.target)) {
             setShowEditServiceForm(false);
         }
-        if (
-            editBookingFormRef.current &&
-            !editBookingFormRef.current.contains(event.target)
-        ) {
+        if (editBookingFormRef.current && !editBookingFormRef.current.contains(event.target)) {
             setShowEditBookingForm(false);
         }
-        if (
-            editDetailFormRef.current &&
-            !editDetailFormRef.current.contains(event.target)
-        ) {
+        if (editDetailFormRef.current && !editDetailFormRef.current.contains(event.target)) {
             setShowEditDetailForm(false);
         }
     };
@@ -247,6 +205,7 @@ function Admin() {
             [name]: value,
         }));
     };
+
     // Sự kiện thêm dữ liệu vào from
     const handleValueUser = (user) => {
         setValueUser(user);
@@ -270,9 +229,7 @@ function Admin() {
     };
     const handleValueBookingFrom = (booking) => {
         setValueBooking(booking);
-        const service = services.find(
-            (service) => service.id === booking.serviceId,
-        );
+        const service = services.find((service) => service.id === booking.serviceId);
         if (service) {
             setServicePrice(service.price);
         }
@@ -296,6 +253,17 @@ function Admin() {
     const getServiceName = (serviceId) => {
         const service = services.find((service) => service.id === serviceId);
         return service ? service.serviceName : 'N/A';
+    };
+    // Search
+    const handleSearchUser = (event) => {
+        const value = event.target.value.toLowerCase();
+        setSearchUser(value);
+        const filteredUsers = users.filter((user) => user.id.toString().includes(value));
+        setFilteredUsers(filteredUsers);
+    };
+    const handleClear = () => {
+        setSearchUser('');
+        inputRef.current.focus();
     };
     // User CRUD
     useEffect(() => {
@@ -325,6 +293,7 @@ function Admin() {
             if (data && data.status === 200) {
                 console.log('Thêm người dùng thành công');
                 toast.success('Thêm người dùng thành công!');
+                setUsers([...users, { ...newUser, id: data.data.id }]);
             } else {
                 console.error('Thêm người dùng thất bại:', data?.data?.message);
                 toast.error('Thêm người dùng thất bại. Vui lòng thử lại.');
@@ -352,11 +321,7 @@ function Admin() {
         try {
             const data = await handleUpdateUserApi(valueUser.id, valueUser);
             if (data.status === '200') {
-                setUsers(
-                    users.map((user) =>
-                        user.id === valueUser.id ? valueUser : user,
-                    ),
-                );
+                setUsers(users.map((user) => (user.id === valueUser.id ? valueUser : user)));
                 setShowEditUserForm(false);
                 toast.success('Cập nhật thông tin người dùng thành công');
             } else {
@@ -381,11 +346,7 @@ function Admin() {
     }, []);
     const handleAddService = async () => {
         try {
-            const data = await handleAddServiceApi(
-                newService.serviceName,
-                newService.price,
-                newService.description,
-            );
+            const data = await handleAddServiceApi(newService.serviceName, newService.price, newService.description);
             if (data && data.status === '200') {
                 console.log('Thêm thành công');
                 toast.success('Thêm thành công!');
@@ -401,16 +362,9 @@ function Admin() {
     };
     const handleUpdateService = async () => {
         try {
-            const data = await handleUpdateServiceApi(
-                valueService.id,
-                valueService,
-            );
+            const data = await handleUpdateServiceApi(valueService.id, valueService);
             if (data.status === '200') {
-                setServices(
-                    services.map((service) =>
-                        service.id === valueService.id ? valueService : service,
-                    ),
-                );
+                setServices(services.map((service) => (service.id === valueService.id ? valueService : service)));
                 setShowEditServiceForm(false);
                 toast.success('Cập nhật thông tin dịch vụ thành công');
             } else {
@@ -425,9 +379,7 @@ function Admin() {
         try {
             const data = await handleDeleteServiceApi(serviceId);
             if (data.status === '200') {
-                setServices(
-                    services.filter((service) => service.id !== serviceId),
-                );
+                setServices(services.filter((service) => service.id !== serviceId));
                 toast.success(`${data.errMessage}`);
             } else {
                 toast.error(`Xóa không thành công: ${data.errMessage}`);
@@ -449,17 +401,12 @@ function Admin() {
         };
         getPetInfor();
     }, []);
-
     const handleUpdatePet = async () => {
         try {
             const data = await handleUpdatePetApi(valuePet.id, valuePet);
             console.log(data);
             if (data.status === '200') {
-                setPets(
-                    pets.map((pet) =>
-                        pet.id === valuePet.id ? valuePet : pet,
-                    ),
-                );
+                setPets(pets.map((pet) => (pet.id === valuePet.id ? valuePet : pet)));
                 setShowEditPetForm(false);
                 toast.success('Cập nhật thông tin vật nuôi thành công');
             } else {
@@ -484,6 +431,11 @@ function Admin() {
             toast.error('Đã xảy ra lỗi khi xóa Vật nuôi');
         }
     };
+    //
+    const parseDate = (dateString) => {
+        const parts = dateString.split('-');
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+    };
     // Booking
     useEffect(() => {
         const getBookingInfor = async () => {
@@ -496,18 +448,13 @@ function Admin() {
         };
         getBookingInfor();
     }, []);
+    // Sắp xếp mảng theo ngày
+    bookings.sort((a, b) => parseDate(a.date) - parseDate(b.date));
     const handleUpdateBooking = async () => {
         try {
-            const data = await handleUpdateBookingApi(
-                valueBooking.id,
-                valueBooking,
-            );
+            const data = await handleUpdateBookingApi(valueBooking.id, valueBooking);
             if (data.status === '200') {
-                setBookings(
-                    bookings.map((booking) =>
-                        booking.id === valueBooking.id ? valueBooking : booking,
-                    ),
-                );
+                setBookings(bookings.map((booking) => (booking.id === valueBooking.id ? valueBooking : booking)));
                 setShowEditBookingForm(false);
                 toast.success('Cập nhật thông tin đặt lịch hẹn thành công');
             } else {
@@ -519,9 +466,7 @@ function Admin() {
         try {
             const data = await handleDeleteBookingApi(bookingId);
             if (data.status === '200') {
-                setBookings(
-                    bookings.filter((booking) => booking.id !== bookingId),
-                );
+                setBookings(bookings.filter((booking) => booking.id !== bookingId));
                 toast.success(`${data.errMessage}`);
             } else {
                 toast.error(`Xóa không thành công: ${data.errMessage}`);
@@ -543,6 +488,7 @@ function Admin() {
         };
         getDetailInfor();
     }, []);
+    details.sort((a, b) => parseDate(a.date) - parseDate(b.date));
     const handleAddDetail = async () => {
         try {
             const data = await handleAddDetailApi(
@@ -571,17 +517,10 @@ function Admin() {
     };
     const handleUpdateDetail = async () => {
         try {
-            const data = await handleUpdateDetailApi(
-                valueDetail.id,
-                valueDetail,
-            );
+            const data = await handleUpdateDetailApi(valueDetail.id, valueDetail);
             console.log(data);
             if (data.status === '200') {
-                setDetails(
-                    details.map((detail) =>
-                        detail.id === valueDetail.id ? valueDetail : detail,
-                    ),
-                );
+                setDetails(details.map((detail) => (detail.id === valueDetail.id ? valueDetail : detail)));
                 setShowEditDetailForm(false);
                 toast.success('Cập nhật thông tin Chi tiết thành công');
             } else {
@@ -648,9 +587,7 @@ function Admin() {
         const times = [];
         for (let hour = 8; hour < 22; hour++) {
             for (let minute = 0; minute < 60; minute += 15) {
-                const time = `${String(hour).padStart(2, '0')}:${String(
-                    minute,
-                ).padStart(2, '0')}:00`;
+                const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
                 times.push(time);
             }
         }
@@ -663,9 +600,7 @@ function Admin() {
         const times = generateTimeOptions();
         return times.filter((time) => {
             const [hour, minute] = time.split(':').map(Number);
-            return (
-                hour > startHour || (hour === startHour && minute > startMinute)
-            );
+            return hour > startHour || (hour === startHour && minute > startMinute);
         });
     };
 
@@ -688,45 +623,27 @@ function Admin() {
                 }}
             >
                 <div className="content-left col-3">
-                    <Buttons
-                        className="content-btn"
-                        onClick={() => handleShowTable('user')}
-                    >
+                    <Buttons className="content-btn" onClick={() => handleShowTable('user')}>
                         Thông tin người dùng
                     </Buttons>
                     <hr />
-                    <Buttons
-                        className="content-btn"
-                        onClick={() => handleShowTable('pet')}
-                    >
+                    <Buttons className="content-btn" onClick={() => handleShowTable('pet')}>
                         Thông tin thú cưng
                     </Buttons>
                     <hr />
-                    <Buttons
-                        className="content-btn"
-                        onClick={() => handleShowTable('service')}
-                    >
+                    <Buttons className="content-btn" onClick={() => handleShowTable('service')}>
                         Thông tin dịch vụ
                     </Buttons>
                     <hr />
-                    <Buttons
-                        className="content-btn"
-                        onClick={() => handleShowTable('booking')}
-                    >
+                    <Buttons className="content-btn" onClick={() => handleShowTable('booking')}>
                         Thông tin dịch vụ được đặt
                     </Buttons>
                     <hr />
-                    <Buttons
-                        className="content-btn"
-                        onClick={() => handleShowTable('bkdetail')}
-                    >
+                    <Buttons className="content-btn" onClick={() => handleShowTable('bkdetail')}>
                         Thông tin chi tiết dịch vụ
                     </Buttons>
                     <hr />
-                    <Buttons
-                        className="content-btn"
-                        onClick={() => handleShowTable('history')}
-                    >
+                    <Buttons className="content-btn" onClick={() => handleShowTable('history')}>
                         Lịch sử đặt dịch vụ
                     </Buttons>
                 </div>
@@ -734,6 +651,24 @@ function Admin() {
                 <div className="content-right col-9">
                     {activeTable === 'user' && (
                         <>
+                            <div className="search">
+                                <input
+                                    ref={inputRef}
+                                    value={searchUser}
+                                    spellCheck={false}
+                                    placeholder="Tìm kiếm..."
+                                    onChange={handleSearchUser}
+                                />
+                                {!!searchUser && (
+                                    <button className="clear" onClick={handleClear}>
+                                        <FontAwesomeIcon icon={faCircleXmark} />
+                                    </button>
+                                )}
+
+                                <button className="search-btn">
+                                    <SearchIcon />
+                                </button>
+                            </div>
                             <table className="user-table">
                                 <thead>
                                     <tr>
@@ -748,22 +683,19 @@ function Admin() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {users.map((user) => (
+                                    {/* {filteredUsers.map((user) => (
                                         <tr key={user.id}>
                                             <td>{user.id}</td>
                                             <td>{user.email}</td>
                                             <td>{user.fullName}</td>
                                             <td>{user.address}</td>
-                                            <td>
-                                                {user.gender ? 'Nữ' : 'Nam'}
-                                            </td>
+                                            <td>{user.gender ? 'Nữ' : 'Nam'}</td>
                                             <td>
                                                 {user.roleId === '0'
                                                     ? 'Admin'
                                                     : user.roleId === '1'
                                                     ? 'Nhân viên'
-                                                    : user.roleId === '2' ||
-                                                      user.roleId === null
+                                                    : user.roleId === '2' || user.roleId === null
                                                     ? 'Người dùng'
                                                     : user.roleId}
                                             </td>
@@ -778,52 +710,90 @@ function Admin() {
                                             >
                                                 <Buttons
                                                     className="edit-btn"
-                                                    onClick={() =>
-                                                        handleValueUser(user)
-                                                    }
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faPen}
-                                                        />
-                                                    }
+                                                    onClick={() => handleValueUser(user)}
+                                                    rightIcon={<FontAwesomeIcon icon={faPen} />}
                                                 >
                                                     Sửa
                                                 </Buttons>
                                                 <Buttons
                                                     className="delete-btn"
-                                                    onClick={() =>
-                                                        handleDeleteUser(
-                                                            user.id,
-                                                        )
-                                                    }
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faTrashCan}
-                                                        />
-                                                    }
+                                                    onClick={() => handleDeleteUser(user.id)}
+                                                    rightIcon={<FontAwesomeIcon icon={faTrashCan} />}
                                                 >
                                                     Xóa
                                                 </Buttons>
-                                                {/* <Buttons
-                                                    className="add-btn"
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faPaw}
-                                                        />
-                                                    }
-                                                >
-                                                    Thêm
-                                                </Buttons> */}
                                             </td>
                                         </tr>
-                                    ))}
+                                    ))} */}
+                                    {users
+                                        .filter((user) => {
+                                            // Kiểm tra xem từ khóa tìm kiếm có tồn tại trong thông tin của người dùng không
+                                            const searchKey = searchUser.toLowerCase();
+                                            return (
+                                                user.email.toLowerCase().includes(searchKey) ||
+                                                user.fullName.toLowerCase().includes(searchKey) ||
+                                                user.address.toLowerCase().includes(searchKey) ||
+                                                (user.gender ? 'Nữ' : 'Nam').toLowerCase().includes(searchKey) ||
+                                                (user.roleId === '0'
+                                                    ? 'Admin'
+                                                    : user.roleId === '1'
+                                                    ? 'Nhân viên'
+                                                    : user.roleId === '2' || user.roleId === null
+                                                    ? 'Người dùng'
+                                                    : user.roleId
+                                                )
+                                                    .toLowerCase()
+                                                    .includes(searchKey) ||
+                                                user.phoneNumber.toLowerCase().includes(searchKey)
+                                            );
+                                        })
+                                        .map((filteredUser) => (
+                                            // Hiển thị các dòng người dùng đã lọc
+                                            <tr key={filteredUser.id}>
+                                                <td>{filteredUser.id}</td>
+                                                <td>{filteredUser.email}</td>
+                                                <td>{filteredUser.fullName}</td>
+                                                <td>{filteredUser.address}</td>
+                                                <td>{filteredUser.gender ? 'Nữ' : 'Nam'}</td>
+                                                <td>
+                                                    {filteredUser.roleId === '0'
+                                                        ? 'Admin'
+                                                        : filteredUser.roleId === '1'
+                                                        ? 'Nhân viên'
+                                                        : filteredUser.roleId === '2' || filteredUser.roleId === null
+                                                        ? 'Người dùng'
+                                                        : filteredUser.roleId}
+                                                </td>
+                                                <td>{filteredUser.phoneNumber}</td>
+                                                <td
+                                                    style={{
+                                                        padding: '0',
+                                                        display: 'flex',
+                                                        width: '100%',
+                                                        border: 'none',
+                                                    }}
+                                                >
+                                                    <Buttons
+                                                        className="edit-btn"
+                                                        onClick={() => handleValueUser(filteredUser)}
+                                                        rightIcon={<FontAwesomeIcon icon={faPen} />}
+                                                    >
+                                                        Sửa
+                                                    </Buttons>
+                                                    <Buttons
+                                                        className="delete-btn"
+                                                        onClick={() => handleDeleteUser(filteredUser.id)}
+                                                        rightIcon={<FontAwesomeIcon icon={faTrashCan} />}
+                                                    >
+                                                        Xóa
+                                                    </Buttons>
+                                                </td>
+                                            </tr>
+                                        ))}
                                 </tbody>
                             </table>
                             <>
-                                <Buttons
-                                    className="create-service"
-                                    onClick={handleShowUserForm}
-                                >
+                                <Buttons className="create-service" onClick={handleShowUserForm}>
                                     Thêm người dùng
                                 </Buttons>
                             </>
@@ -860,27 +830,15 @@ function Admin() {
                                             >
                                                 <Buttons
                                                     className="edit-btn"
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faPen}
-                                                        />
-                                                    }
-                                                    onClick={() =>
-                                                        handleValuePet(pet)
-                                                    }
+                                                    rightIcon={<FontAwesomeIcon icon={faPen} />}
+                                                    onClick={() => handleValuePet(pet)}
                                                 >
                                                     Sửa
                                                 </Buttons>
                                                 <Buttons
                                                     className="delete-btn"
-                                                    onClick={() =>
-                                                        handleDeletePet(pet.id)
-                                                    }
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faTrashCan}
-                                                        />
-                                                    }
+                                                    onClick={() => handleDeletePet(pet.id)}
+                                                    rightIcon={<FontAwesomeIcon icon={faTrashCan} />}
                                                 >
                                                     Xóa
                                                 </Buttons>
@@ -926,31 +884,15 @@ function Admin() {
                                             >
                                                 <Buttons
                                                     className="edit-btn"
-                                                    onClick={() =>
-                                                        handleValueService(
-                                                            service,
-                                                        )
-                                                    }
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faPen}
-                                                        />
-                                                    }
+                                                    onClick={() => handleValueService(service)}
+                                                    rightIcon={<FontAwesomeIcon icon={faPen} />}
                                                 >
                                                     Sửa
                                                 </Buttons>
                                                 <Buttons
                                                     className="delete-btn"
-                                                    onClick={() =>
-                                                        handleDeleteService(
-                                                            service.id,
-                                                        )
-                                                    }
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faTrashCan}
-                                                        />
-                                                    }
+                                                    onClick={() => handleDeleteService(service.id)}
+                                                    rightIcon={<FontAwesomeIcon icon={faTrashCan} />}
                                                 >
                                                     Xóa
                                                 </Buttons>
@@ -960,10 +902,7 @@ function Admin() {
                                 </tbody>
                             </table>
                             <>
-                                <Buttons
-                                    className="create-service"
-                                    onClick={handleShowServiceForm}
-                                >
+                                <Buttons className="create-service" onClick={handleShowServiceForm}>
                                     Thêm dịch vụ
                                 </Buttons>
                             </>
@@ -989,9 +928,9 @@ function Admin() {
                                     {bookings.map((booking) => (
                                         <tr key={booking.id}>
                                             <td>{booking.id}</td>
-                                            <td>{booking.serviceId}</td>
-                                            <td>{booking.userId}</td>
-                                            <td>{booking.petId}</td>
+                                            <td>{getServiceName(booking.serviceId)}</td>
+                                            <td>{getUserFullName(booking.userId)}</td>
+                                            <td>{getPetName(booking.petId)}</td>
                                             <td>{booking.time}</td>
                                             <td>{booking.date}</td>
                                             <td>{booking.startTime}</td>
@@ -1006,48 +945,22 @@ function Admin() {
                                             >
                                                 <Buttons
                                                     className="edit-btn"
-                                                    onClick={() =>
-                                                        handleValueBooking(
-                                                            booking,
-                                                        )
-                                                    }
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faPen}
-                                                        />
-                                                    }
+                                                    onClick={() => handleValueBooking(booking)}
+                                                    rightIcon={<FontAwesomeIcon icon={faPen} />}
                                                 >
                                                     Sửa
                                                 </Buttons>
                                                 <Buttons
                                                     className="delete-btn"
-                                                    onClick={() =>
-                                                        handleDeleteBooking(
-                                                            booking.id,
-                                                        )
-                                                    }
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faTrashCan}
-                                                        />
-                                                    }
+                                                    onClick={() => handleDeleteBooking(booking.id)}
+                                                    rightIcon={<FontAwesomeIcon icon={faTrashCan} />}
                                                 >
                                                     Xóa
                                                 </Buttons>
                                                 <Buttons
                                                     className="add-btn"
-                                                    onClick={() =>
-                                                        handleValueBookingFrom(
-                                                            booking,
-                                                        )
-                                                    }
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={
-                                                                faCalendarDays
-                                                            }
-                                                        />
-                                                    }
+                                                    onClick={() => handleValueBookingFrom(booking)}
+                                                    rightIcon={<FontAwesomeIcon icon={faCalendarDays} />}
                                                 >
                                                     Đặt
                                                 </Buttons>
@@ -1079,15 +992,9 @@ function Admin() {
                                 <tbody>
                                     {details.map((detail) => (
                                         <tr key={detail.id}>
-                                            <td>
-                                                {getServiceName(
-                                                    detail.serviceId,
-                                                )}
-                                            </td>
+                                            <td>{getServiceName(detail.serviceId)}</td>
                                             <td>{getPetName(detail.petId)}</td>
-                                            <td>
-                                                {getUserFullName(detail.userId)}
-                                            </td>
+                                            <td>{getUserFullName(detail.userId)}</td>
                                             <td>{detail.price}</td>
                                             <td>{detail.phoneNumber}</td>
                                             <td>{detail.time}</td>
@@ -1104,16 +1011,8 @@ function Admin() {
                                             >
                                                 <Buttons
                                                     className="edit-btn"
-                                                    onClick={() =>
-                                                        handleValueDetail(
-                                                            detail,
-                                                        )
-                                                    }
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faPen}
-                                                        />
-                                                    }
+                                                    onClick={() => handleValueDetail(detail)}
+                                                    rightIcon={<FontAwesomeIcon icon={faPen} />}
                                                 >
                                                     Sửa
                                                 </Buttons>
@@ -1142,19 +1041,13 @@ function Admin() {
                                 <tbody>
                                     {historys.map((history) => (
                                         <tr key={history.id}>
-                                            <td>
-                                                {getServiceName(
-                                                    history.serviceId,
-                                                )}
-                                            </td>
+                                            <td>{getServiceName(history.serviceId)}</td>
                                             <td>{getPetName(history.petId)}</td>
-                                            <td>
-                                                {getUserFullName(history.userId)}
-                                            </td>
+                                            <td>{getUserFullName(history.userId)}</td>
                                             <td>{history.price}</td>
-                                            <td>{history.phoneNumber}</td>
                                             <td>{history.time}</td>
                                             <td>{history.date}</td>
+                                            <td>{history.phoneNumber}</td>
                                             <td
                                                 style={{
                                                     padding: '0',
@@ -1165,12 +1058,7 @@ function Admin() {
                                             >
                                                 <Buttons
                                                     className="edit-btn"
-                                                    
-                                                    rightIcon={
-                                                        <FontAwesomeIcon
-                                                            icon={faPen}
-                                                        />
-                                                    }
+                                                    rightIcon={<FontAwesomeIcon icon={faPen} />}
                                                 >
                                                     Sửa
                                                 </Buttons>
@@ -1251,29 +1139,18 @@ function Admin() {
                             <div>
                                 <label>Giới tính</label>
                                 <div className="input-group">
-                                    <select
-                                        name="gender"
-                                        value={valueUser.gender}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">
-                                            --Chọn giới tính--
-                                        </option>
+                                    <select name="gender" value={valueUser.gender} onChange={handleInputChange}>
+                                        <option value="">--Chọn giới tính--</option>
                                         <option value="0">Nam</option>
                                         <option value="1">Nữ</option>
                                     </select>
                                 </div>
                             </div>
                             <div className="form-actions">
-                                <Buttons
-                                    className="exit-btn"
-                                    onClick={handleShowEditUserForm}
-                                >
+                                <Buttons className="exit-btn" onClick={handleShowEditUserForm}>
                                     Hủy
                                 </Buttons>
-                                <Buttons onClick={handleUpdateUser}>
-                                    Sửa
-                                </Buttons>
+                                <Buttons onClick={handleUpdateUser}>Sửa</Buttons>
                             </div>
                         </div>
                     </div>
@@ -1332,10 +1209,7 @@ function Admin() {
                                 </div>
                             </div>
                             <div className="form-actions">
-                                <Buttons
-                                    className="exit-btn"
-                                    onClick={handleShowEditPetForm}
-                                >
+                                <Buttons className="exit-btn" onClick={handleShowEditPetForm}>
                                     Hủy
                                 </Buttons>
                                 <Buttons onClick={handleUpdatePet}>Sửa</Buttons>
@@ -1361,12 +1235,7 @@ function Admin() {
                             </div>
                             <label>Giá</label>
                             <div className="input-group">
-                                <input
-                                    type="text"
-                                    name="price"
-                                    value={newService.price}
-                                    onChange={handleInputChange}
-                                />
+                                <input type="text" name="price" value={newService.price} onChange={handleInputChange} />
                             </div>
                             <label>Mô tả</label>
                             <div className="input-group">
@@ -1377,15 +1246,10 @@ function Admin() {
                                 />
                             </div>
                             <div className="form-actions">
-                                <Buttons
-                                    className="exit-btn"
-                                    onClick={handleShowServiceForm}
-                                >
+                                <Buttons className="exit-btn" onClick={handleShowServiceForm}>
                                     Hủy
                                 </Buttons>
-                                <Buttons onClick={handleAddService}>
-                                    Thêm
-                                </Buttons>
+                                <Buttons onClick={handleAddService}>Thêm</Buttons>
                             </div>
                         </div>
                     </div>
@@ -1433,15 +1297,10 @@ function Admin() {
                                 </div>
                             </div>
                             <div className="form-actions">
-                                <Buttons
-                                    className="exit-btn"
-                                    onClick={handleShowEditServiceForm}
-                                >
+                                <Buttons className="exit-btn" onClick={handleShowEditServiceForm}>
                                     Hủy
                                 </Buttons>
-                                <Buttons onClick={handleUpdateService}>
-                                    Sửa
-                                </Buttons>
+                                <Buttons onClick={handleUpdateService}>Sửa</Buttons>
                             </div>
                         </div>
                     </div>
@@ -1501,11 +1360,7 @@ function Admin() {
                                 <div className="second-group">
                                     <label>Ngày</label>
                                     <div className="input-group">
-                                        <select
-                                            name="date"
-                                            value={valueBooking.date}
-                                            onChange={handleInputChange}
-                                        >
+                                        <select name="date" value={valueBooking.date} onChange={handleInputChange}>
                                             <option value="">Chọn ngày</option>
                                             {generateDateOptions()}
                                         </select>
@@ -1521,19 +1376,12 @@ function Admin() {
                                             value={valueBooking.startTime}
                                             onChange={handleInputChange}
                                         >
-                                            <option value="">
-                                                Chọn giờ bắt đầu
-                                            </option>
-                                            {generateTimeOptions().map(
-                                                (time) => (
-                                                    <option
-                                                        key={time}
-                                                        value={time}
-                                                    >
-                                                        {time}
-                                                    </option>
-                                                ),
-                                            )}
+                                            <option value="">Chọn giờ bắt đầu</option>
+                                            {generateTimeOptions().map((time) => (
+                                                <option key={time} value={time}>
+                                                    {time}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -1545,12 +1393,8 @@ function Admin() {
                                             value={valueBooking.endTime}
                                             onChange={handleInputChange}
                                         >
-                                            <option value="">
-                                                Chọn giờ kết thúc
-                                            </option>
-                                            {generateEndTimeOptions(
-                                                valueBooking.startTime,
-                                            ).map((time) => (
+                                            <option value="">Chọn giờ kết thúc</option>
+                                            {generateEndTimeOptions(valueBooking.startTime).map((time) => (
                                                 <option key={time} value={time}>
                                                     {time}
                                                 </option>
@@ -1560,15 +1404,10 @@ function Admin() {
                                 </div>
                             </div>
                             <div className="form-actions">
-                                <Buttons
-                                    className="exit-btn"
-                                    onClick={handleShowEditBookingForm}
-                                >
+                                <Buttons className="exit-btn" onClick={handleShowEditBookingForm}>
                                     Hủy
                                 </Buttons>
-                                <Buttons onClick={handleUpdateBooking}>
-                                    Sửa
-                                </Buttons>
+                                <Buttons onClick={handleUpdateBooking}>Sửa</Buttons>
                             </div>
                         </div>
                     </div>
@@ -1641,14 +1480,8 @@ function Admin() {
                             <div>
                                 <label>Giới tính</label>
                                 <div className="input-group">
-                                    <select
-                                        name="gender"
-                                        value={newUser.gender}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">
-                                            --Chọn giới tính--
-                                        </option>
+                                    <select name="gender" value={newUser.gender} onChange={handleInputChange}>
+                                        <option value="">--Chọn giới tính--</option>
                                         <option value="0">Nam</option>
                                         <option value="1">Nữ</option>
                                     </select>
@@ -1657,14 +1490,8 @@ function Admin() {
                             <div>
                                 <label>Quyền</label>
                                 <div className="input-group">
-                                    <select
-                                        name="roleId"
-                                        value={newUser.roleId}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">
-                                            --Chọn quyền hạn--
-                                        </option>
+                                    <select name="roleId" value={newUser.roleId} onChange={handleInputChange}>
+                                        <option value="">--Chọn quyền hạn--</option>
                                         <option value="0">Admin</option>
                                         <option value="1">Nhân viên</option>
                                         <option value="2">Người dùng</option>
@@ -1672,10 +1499,7 @@ function Admin() {
                                 </div>
                             </div>
                             <div className="form-actions">
-                                <Buttons
-                                    className="exit-btn"
-                                    onClick={handleShowUserForm}
-                                >
+                                <Buttons className="exit-btn" onClick={handleShowUserForm}>
                                     Hủy
                                 </Buttons>
                                 <Buttons onClick={handleAddUser}>Thêm</Buttons>
@@ -1917,19 +1741,11 @@ function Admin() {
                                 </div>
                             </div>
                             <div className="form-actions">
-                                <Buttons
-                                    className="exit-btn"
-                                    onClick={handleShowEditDetailForm}
-                                >
+                                <Buttons className="exit-btn" onClick={handleShowEditDetailForm}>
                                     Hủy
                                 </Buttons>
-                                <Buttons onClick={handleUpdateDetail}>
-                                    Sửa
-                                </Buttons>
-                                <Buttons
-                                    className="save-btn"
-                                    onClick={handleAddHistory}
-                                >
+                                <Buttons onClick={handleUpdateDetail}>Sửa</Buttons>
+                                <Buttons className="save-btn" onClick={handleAddHistory}>
                                     Lưu
                                 </Buttons>
                             </div>
